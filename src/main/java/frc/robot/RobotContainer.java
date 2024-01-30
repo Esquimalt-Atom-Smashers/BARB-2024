@@ -6,9 +6,12 @@ package frc.robot;
 
 import static edu.wpi.first.wpilibj2.command.Commands.*;
 
+import java.util.Objects;
+
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import frc.lib.controller.LogitechController;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.subsystems.*;
@@ -24,8 +27,10 @@ import frc.robot.subsystems.BlinkinSubsystem.BlinkinValue;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
-    // private final LogitechController driveController = new LogitechController(ControllerConstants.DRIVE_CONTROLLER);
-    private final XboxController driveController = new XboxController(0);
+    private final boolean USING_LOGITECH_CONTROLLER = true;
+    private final LogitechController driverControllerLogitech = new LogitechController(0);
+    private final XboxController driverControllerXbox = new XboxController(1);
+
     // private final LogitechController operatorController = new
     // LogitechController(ControllerConstants.OPERATOR_CONTROLLER);
 
@@ -54,18 +59,19 @@ public class RobotContainer {
 
     public double getDriveForwardAxis() {
         return -forwardRateLimiter.calculate(
-                square(deadband(driveController.getLeftY(), 0.05)) * Constants.SwerveConstants.maxSpeed);
+            square(deadband(driverControllerLogitech.getLeftYAxis().getRaw(), 0.05)) * Constants.SwerveConstants.maxSpeed);
     }
 
     public double getDriveStrafeAxis() {
-        return -strafeRateLimiter.calculate(
-                square(deadband(driveController.getLeftX(), 0.05)) * Constants.SwerveConstants.maxSpeed * 0.75);
+            return -forwardRateLimiter.calculate(
+                square(deadband(driverControllerLogitech.getLeftXAxis().getRaw(), 0.05)) * Constants.SwerveConstants.maxSpeed);
+        
     }
 
     public double getDriveRotationAxis() {
-        return -square(deadband(driveController.getRightX(), 0.05))
-                * Constants.SwerveConstants.maxAngularVelocity
-                * 0.75;
+            return -forwardRateLimiter.calculate(
+                square(deadband(driverControllerLogitech.getRightXAxis().getRaw(), 0.05)) * Constants.SwerveConstants.maxAngularVelocity);
+        
     }
 
     private static double deadband(double value, double tolerance) {

@@ -24,6 +24,8 @@ import com.ctre.phoenix6.hardware.TalonFX;
  */
 
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.lib.swerve.CTREConfigs;
@@ -37,8 +39,10 @@ import frc.lib.swerve.CTREConfigs;
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
   public static CTREConfigs ctreConfigs = new CTREConfigs();
-
+  public SendableChooser<String> controllerType = new SendableChooser<>();
+  public static String selectedController = "Logitech";
   private RobotContainer m_robotContainer;
+
 
   /**
    * This function is run when the robot is first started up and should be used for any
@@ -49,6 +53,9 @@ public class Robot extends TimedRobot {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer(this);
+    controllerType.addOption("Logitech", selectedController);
+    controllerType.addOption("XBox", selectedController);
+    SmartDashboard.putData("Controller Type", controllerType);
   }
 
   /**
