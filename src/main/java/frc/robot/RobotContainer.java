@@ -12,6 +12,7 @@ import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj2.command.Commands;
 import frc.lib.controller.LogitechController;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.subsystems.*;
@@ -28,6 +29,7 @@ import frc.robot.subsystems.BlinkinSubsystem.BlinkinValue;
  */
 public class RobotContainer {
     private final LogitechController driverControllerLogitech = new LogitechController(0);
+    private final LogitechController operatorControllerLogitech = new LogitechController(1);
 
     // private final LogitechController operatorController = new
     // LogitechController(ControllerConstants.OPERATOR_CONTROLLER);
@@ -36,8 +38,9 @@ public class RobotContainer {
     public static SlewRateLimiter strafeRateLimiter = new SlewRateLimiter(40, -40, 0);
 
     private final SwerveDriveSubsystem swerveDriveSubsystem = new SwerveDriveSubsystem();
-    private final LimelightSubsystem limelightSubsystem = new
-    LimelightSubsystem();
+    private final LimelightSubsystem limelightSubsystem = new LimelightSubsystem();
+    private final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
+
     // private final BlinkinSubsystem blinkinSubsystem = new BlinkinSubsystem();
 
     public RobotContainer(TimedRobot robot) {
@@ -50,10 +53,14 @@ public class RobotContainer {
                 this::getDriveRotationAxis, true));
 
         driverControllerLogitech.getA().onTrue(swerveDriveSubsystem.rotateCenterApriltagCommand(() -> 0.2, limelightSubsystem.getAprilTagXOffset()));
+        operatorControllerLogitech.getA().onTrue(shooterSubsystem.shootWithTimeout());
+
+
         // driveController.getA().whileTrue(
         // swerveDriveSubsystem.rotateCenterApriltagCommand(() -> 0.05,
         // limelightSubsystem.getAprilTagXOffset()));
         // driveController.getB().onTrue(blinkinSubsystem.updateColour(BlinkinValue.CONFETTI));
+        // shooterSubsystem.setDefaultCommand(shooterSubsystem.getDefaultCommand());
     }
 
     public double getDriveForwardAxis() {

@@ -5,6 +5,7 @@ import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkBase.ControlType;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
@@ -43,7 +44,7 @@ public class ShooterSubsystem extends SubsystemBase {
     }
 
     private void setMotors(double rpm) {
-        rpm = (rpm > Constants.ShooterConstants.MAX_SHOOTER_RPM) ? Constants.ShooterConstants.MAX_SHOOTER_RPM : rpm;
+        rpm = Math.min(rpm, Constants.ShooterConstants.MAX_SHOOTER_RPM);
         leftPIDController.setReference(rpm, ControlType.kVelocity);
         rightPIDController.setReference(rpm, ControlType.kVelocity);
     }
@@ -54,6 +55,12 @@ public class ShooterSubsystem extends SubsystemBase {
         });
     }
     
+    public Command shootWithTimeout() {
+        Timer timer = new Timer();
+        return run(() -> {
+            setMotors(Constants.ShooterConstants.SHOOT_RPM);
+        }).onlyWhile(() -> !timer.hasElapsed(3)).andThen(stopShooting());
+    }
     public Command shoot(double velocity) {
         return runOnce(() -> {
             setMotors(velocity);

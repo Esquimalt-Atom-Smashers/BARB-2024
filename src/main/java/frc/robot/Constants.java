@@ -234,16 +234,16 @@ public final class Constants {
 
         public static final double VOLTAGE_COMPENSATION = 12.2;
 
-        public static final double LEFT_SHOOTER_PID_K_P = 0; //not right
-        public static final double LEFT_SHOOTER_PID_K_I = 0; //not right
-        public static final double LEFT_SHOOTER_PID_K_D = 0; //not right
+        public static final double LEFT_SHOOTER_PID_K_P = -1; 
+        public static final double LEFT_SHOOTER_PID_K_I = -1; 
+        public static final double LEFT_SHOOTER_PID_K_D = -1; 
 
-        public static final double RIGHT_SHOOTER_PID_K_P = 0; //not right
-        public static final double RIGHT_SHOOTER_PID_K_I = 0; //not right
-        public static final double RIGHT_SHOOTER_PID_K_D = 0; //not right
+        public static final double RIGHT_SHOOTER_PID_K_P = -1; 
+        public static final double RIGHT_SHOOTER_PID_K_I = -1; 
+        public static final double RIGHT_SHOOTER_PID_K_D = -1; 
 
-        public static final double MAX_SHOOTER_RPM = -1; //not right
+        public static final double MAX_SHOOTER_RPM = -1;
         
-        public static final double SHOOT_RPM = -1; //not right
+        public static final double SHOOT_RPM = -1;     
     }
 }

@@ -62,8 +62,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      * 
      * @return A command object.
      */
-    public Command driveCommand(
-            DoubleSupplier forward, DoubleSupplier strafe, DoubleSupplier rotation, boolean isFieldOriented) {
+    public Command driveCommand(DoubleSupplier forward, DoubleSupplier strafe, DoubleSupplier rotation, boolean isFieldOriented) {
         return run(() -> {
             setVelocity(
                     new ChassisSpeeds(forward.getAsDouble(), strafe.getAsDouble(), rotation.getAsDouble()),
