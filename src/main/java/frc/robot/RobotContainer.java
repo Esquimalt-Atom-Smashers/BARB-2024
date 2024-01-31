@@ -53,7 +53,7 @@ public class RobotContainer {
                 this::getDriveRotationAxis, true));
 
         driverControllerLogitech.getA().onTrue(swerveDriveSubsystem.rotateCenterApriltagCommand(() -> 0.2, limelightSubsystem.getAprilTagXOffset()));
-        operatorControllerLogitech.getA().onTrue(shooterSubsystem.shootWithTimeout());
+        operatorControllerLogitech.getA().onTrue(shooterSubsystem.shootManuallyWithTimeout(-1));
 
 
         // driveController.getA().whileTrue(
