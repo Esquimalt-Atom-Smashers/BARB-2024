@@ -8,25 +8,10 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.revrobotics.CANSparkBase.IdleMode;
 
-import edu.wpi.first.apriltag.AprilTag;
-import edu.wpi.first.apriltag.AprilTagFieldLayout;
-import edu.wpi.first.apriltag.AprilTagFieldLayout.OriginPosition;
-import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Rotation3d;
-import edu.wpi.first.math.geometry.Transform2d;
-import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
-import edu.wpi.first.math.geometry.Translation3d;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import frc.lib.swerve.SecondOrderSwerveKinematics;
 import frc.lib.swerve.SwerveModuleConstants;
-import java.util.Arrays;
-import java.util.List;
-import java.util.TreeMap;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -241,5 +226,10 @@ public final class Constants {
 
         public static final double INTAKE_RPM = 4000;
         public static final double OUTTAKE_RPM = 3000;
+    }
+
+    public static class ShooterConstants {
+        public static final int LEFT_SHOOTER_PORT = -1;
+        public static final int RIGHT_SHOOTER_PORT = -1;
     }
 }

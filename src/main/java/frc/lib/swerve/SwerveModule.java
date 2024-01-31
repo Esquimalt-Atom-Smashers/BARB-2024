@@ -2,8 +2,6 @@ package frc.lib.swerve;
 
 import com.ctre.phoenix6.hardware.CANcoder;
 
-//import javax.xml.transform.Templates;
-
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.StatusSignal;
 import com.ctre.phoenix6.configs.FeedbackConfigs;

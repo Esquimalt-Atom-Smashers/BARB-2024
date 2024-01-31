@@ -3,12 +3,12 @@ package frc.robot.subsystems;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
+import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.gyro.ADISGyro;
-import frc.lib.gyro.NavXGyro;
 import frc.lib.swerve.SwerveDriveSignal;
 import frc.lib.swerve.SwerveModule;
 import frc.robot.Constants;
@@ -37,6 +37,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      * Constructs a SwerveDriveSubsystem object.
      * Initializes the gyro, modules, and any autonmous variables.
      */
+    private SwerveDriveOdometry odometry;
+
     public SwerveDriveSubsystem() {
         gyro = new ADISGyro();
 
@@ -46,6 +48,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                 new SwerveModule(2, Constants.SwerveConstants.Mod2.constants),
                 new SwerveModule(3, Constants.SwerveConstants.Mod3.constants)
         };
+
+        odometry = new SwerveDriveOdometry(Constants.SwerveConstants.swerveKinematics, getGyroRotation(), getModulePositions());
     }
 
     /**
@@ -194,6 +198,8 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         updateOdometry();
 
         updateModules(driveSignal);
+        odometry.update(getGyroRotation(), getModulePositions());
+
     }
 
     /** Updates the current robot odometry. */

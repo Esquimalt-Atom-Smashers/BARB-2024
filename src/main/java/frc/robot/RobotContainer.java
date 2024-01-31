@@ -27,9 +27,7 @@ import frc.robot.subsystems.BlinkinSubsystem.BlinkinValue;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
-    private final boolean USING_LOGITECH_CONTROLLER = true;
     private final LogitechController driverControllerLogitech = new LogitechController(0);
-    private final XboxController driverControllerXbox = new XboxController(1);
 
     // private final LogitechController operatorController = new
     // LogitechController(ControllerConstants.OPERATOR_CONTROLLER);
@@ -38,8 +36,8 @@ public class RobotContainer {
     public static SlewRateLimiter strafeRateLimiter = new SlewRateLimiter(40, -40, 0);
 
     private final SwerveDriveSubsystem swerveDriveSubsystem = new SwerveDriveSubsystem();
-    // private final LimelightSubsystem limelightSubsystem = new
-    // LimelightSubsystem();
+    private final LimelightSubsystem limelightSubsystem = new
+    LimelightSubsystem();
     // private final BlinkinSubsystem blinkinSubsystem = new BlinkinSubsystem();
 
     public RobotContainer(TimedRobot robot) {
@@ -51,6 +49,7 @@ public class RobotContainer {
                 this::getDriveForwardAxis, this::getDriveStrafeAxis,
                 this::getDriveRotationAxis, true));
 
+        driverControllerLogitech.getA().onTrue(swerveDriveSubsystem.rotateCenterApriltagCommand(() -> 0.2, limelightSubsystem.getAprilTagXOffset()));
         // driveController.getA().whileTrue(
         // swerveDriveSubsystem.rotateCenterApriltagCommand(() -> 0.05,
         // limelightSubsystem.getAprilTagXOffset()));
