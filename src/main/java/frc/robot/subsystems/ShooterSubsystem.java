@@ -55,6 +55,12 @@ public class ShooterSubsystem extends SubsystemBase {
         });
     }
     
+    public Command shootManually(double voltage) {
+        return runOnce(() -> {
+            leftShooterMotor.set(voltage);
+            rightShooterMotor.set(voltage);
+        });
+    } 
     public Command shootManuallyWithTimeout(double voltage) {
         Timer timer = new Timer();
         return run(() -> {
