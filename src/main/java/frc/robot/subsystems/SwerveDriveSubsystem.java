@@ -12,12 +12,16 @@ import frc.lib.gyro.ADISGyro;
 import frc.lib.swerve.SwerveDriveSignal;
 import frc.lib.swerve.SwerveModule;
 import frc.robot.Constants;
+
 import java.util.function.DoubleSupplier;
+
+import com.pathplanner.lib.auto.AutoBuilder;
+
 import frc.lib.swerve.SwerveModuleConstants;
 
 public class SwerveDriveSubsystem extends SubsystemBase {
     /** The current pose of the robot. */
-    private Pose2d pose = new Pose2d();
+    //private Pose2d pose = new Pose2d();
 
     /** The current velocity and previous velocity of the robot. */
     private ChassisSpeeds velocity = new ChassisSpeeds();
@@ -50,6 +54,16 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         };
 
         odometry = new SwerveDriveOdometry(Constants.SwerveConstants.swerveKinematics, getGyroRotation(), getModulePositions());
+
+        //Configures pathplanner
+        AutoBuilder.configureHolonomic(
+            this::getPose, 
+            this::resetPose, 
+            this::getVelocity, 
+            this::setVelocity, 
+            Constants.SwerveConstants.pathFollowerConfig, 
+            () -> false, //Change this later 
+            this);
     }
 
     /**
@@ -102,10 +116,23 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         this.maxSpeedSupplier = maxSpeedSupplier;
     }
 
-    /** @return The pose of the robot. */
+    /** @return The pose of the robot. (used in pathplanner)*/
     public Pose2d getPose() {
-        return pose;
+        //return pose; isn't pose always 0?
+        return odometry.getPoseMeters();
     }
+
+    /** Resets pose of the robot. (used in pathplanner) */
+    public void resetPose(Pose2d pose) {
+        odometry.resetPosition(getGyroRotation(), getModulePositions(), pose);
+    }
+
+    // public void driveRobotRelative(ChassisSpeeds robotRelativeSpeeds) {
+    //     ChassisSpeeds targetSpeeds = ChassisSpeeds.discretize(robotRelativeSpeeds, 0.02);
+    
+    //     SwerveModuleState[] targetStates = Constants.SwerveConstants.swerveKinematics.toSwerveModuleStates(targetSpeeds);
+    //     setModuleStates(targetStates, false);
+    //   }    
 
     /** @return The robot relative velocity of the drivetrain. */
     public ChassisSpeeds getVelocity() {

@@ -6,6 +6,9 @@ package frc.robot;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
+import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
+import com.pathplanner.lib.util.PIDConstants;
+import com.pathplanner.lib.util.ReplanningConfig;
 import com.revrobotics.CANSparkBase.IdleMode;
 
 import edu.wpi.first.math.geometry.Translation2d;
@@ -42,7 +45,7 @@ public final class Constants {
 
 
   public static final class SwerveConstants extends CompBotConstants {
-    
+      
   }
 
   public static class CompBotConstants {
@@ -145,6 +148,15 @@ public final class Constants {
 
       /* Angle Encoder Invert */
       public static final SensorDirectionValue canCoderInvert = SensorDirectionValue.CounterClockwise_Positive;
+
+      /* PathPlanner Configuration */
+      public static final HolonomicPathFollowerConfig pathFollowerConfig = new HolonomicPathFollowerConfig(
+      new PIDConstants(5.0, 0, 0), // Translation constants 
+      new PIDConstants(5.0, 0, 0), // Rotation constants 
+      maxSpeed, 
+      moduleTranslations[0].getNorm(), // Drive base radius (distance from center to furthest module) 
+      new ReplanningConfig()
+    );
 
       /* Module Specific Constants */
       // Note, bevel gears should face left (relative to back-to-front)
