@@ -258,4 +258,8 @@ public final class Constants {
         
         public static final double SHOOT_RPM = -1;     
     }
+    
+    public static class TrapDoorConstants {
+        public static final int SOLENOID = -1;
+    }
 }
