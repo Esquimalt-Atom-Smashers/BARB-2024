@@ -232,12 +232,26 @@ public final class Constants {
         public static final double INTAKE_CONTROLLER_IZ = 0; 
         public static final double INTAKE_CONTROLLER_FF = 1.5e-5; 
 
+        public static final double ROTATION_CONTROLLER_KP = -1;
+        public static final double ROTATION_CONTROLLER_KI = -1;
+        public static final double ROTATION_CONTROLLER_KD = -1;
+        public static final double ROTATION_CONTROLLER_IZ = -1;
+        public static final double ROTATION_CONTROLLER_FF = -1;
+
+        // HI -JAKE
+
         /** Velocity Constants */
         public static final double INTAKE_MAX_RPM = 5000;
         public static final double OUTTAKE_MAX_RPM = -2000;
+        public static final double ROTATION_MAX_RPM = -1;
+
+        public static final double ROTATION_MAX_VOLTAGE = -1;
+        public static final double INTAKE_MAX_VOLTAGE = 12.2;
 
         public static final double INTAKE_RPM = 4000;
         public static final double OUTTAKE_RPM = 3000;
+        public static final double INTAKE_TO_INDEX_RPM = -1;
+        public static final double INTAKE_TO_INTAKE_RPM = 1;
     }
 
     public static class ShooterConstants {
