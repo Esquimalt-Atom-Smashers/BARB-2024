@@ -8,6 +8,7 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants;
 
@@ -57,8 +58,8 @@ public class ShooterSubsystem extends SubsystemBase {
     }
     
     /** @return Command that starts shooting at the default velocity */
-    public Command shoot() {
-        return shootAtVelocity(Constants.ShooterConstants.SHOOT_RPM);
+    public Command shootCommand() {
+        return shootAtVelocityCommand(Constants.ShooterConstants.SHOOT_RPM);
     }
     
     /**
@@ -67,7 +68,7 @@ public class ShooterSubsystem extends SubsystemBase {
      * @param velocity The velocity to shoot at
      * @return The command that shoots at that velocity
      */
-    public Command shootAtVelocity(double velocity) {
+    public Command shootAtVelocityCommand(double velocity) {
         return runOnce(() -> setVelocity(velocity));
     }
     
@@ -77,41 +78,45 @@ public class ShooterSubsystem extends SubsystemBase {
      * @param voltage The voltage to shoot at
      * @return The command that shoots at that voltage
      */
-    public Command shootAtVoltage(double voltage) {
+    public Command shootAtVoltageCommand(double voltage) {
         return runOnce(() -> setVoltage(voltage));
     } 
     
     /**
-     * Creates and returns a command that shoots at a specified voltage for three seconds, then stops. 
+     * Creates and returns a command that shoots at a specified voltage for a specified amount of time, then stops. 
      * 
      * @param voltage The voltage to shoot at
-     * @return The command that shoots at that voltage, then stops after three seconds
+     * @param timeout The amount of seconds to shoot for
+     * @return The command that shoots at that voltage, then stops after that time
      */
-    public Command shootManuallyWithTimeout(double voltage) {
-        Timer timer = new Timer();
-        // I (Elliot) changed this from the commented version below because the timer needs to be reset at the start of the command. 
+    public Command shootAtVoltageCommand(double voltage, double timeout) {
+        // I (Elliot) changed this from the commented version below because there is an already defined command that waits for a specific amount of time. 
         // I did the same to shootWithTimeout
-        return runOnce(timer::reset)
-        .andThen(shootAtVoltage(voltage), new WaitUntilCommand(() -> timer.hasElapsed(3)), stopShooting());
+        return shootAtVoltageCommand(voltage)
+            .andThen(new WaitCommand(timeout), stopShootingCommand());
         // return run(() -> {
             //     leftShooterMotor.setVoltage(voltage);
             //     rightShooterMotor.setVoltage(voltage);
             // }).until(() -> timer.hasElapsed(3)).andThen(stopShooting());
     }
         
-    /** @return Command that shoots for three seconds then stops */
-    public Command shootWithTimeout() {
-        Timer timer = new Timer();
-        // See shootManuallyWithTimeout for reason why
-        return runOnce(timer::reset)
-        .andThen(shoot(), new WaitUntilCommand(() -> timer.hasElapsed(3)), stopShooting());
+    /**
+     * Shoot for a specified amount of time, then stop. 
+     * 
+     * @param timeout The amount of time to shoot for
+     * @return The command that shoots for that amount of time, then stops
+     */
+    public Command shootWithTimeout(double timeout) {
+        // See shootManuallyWithTimeout for reason why this was changed
+        return shootCommand()
+            .andThen(new WaitCommand(timeout), stopShootingCommand());
         // return run(() -> {
             //     setMotors(Constants.ShooterConstants.SHOOT_RPM);
             // }).until(() -> timer.hasElapsed(3)).andThen(stopShooting());
     }
     
     /** @return Command that stops the motors */
-    public Command stopShooting() {
+    public Command stopShootingCommand() {
         return runOnce(this::stopMotors);
     }
     

@@ -65,26 +65,16 @@ public final class IntakeSubsystem extends SubsystemBase {
         rotationController.setOutputRange(-1, 1);
     }
 
-    public Command intake() {
+    public Command intakeCommand() {
         return run(() -> intake(IntakeConstants.INTAKE_RPM));
     }
 
-    public Command outtake() {
+    public Command outtakeCommand() {
         return run(() -> outtake(IntakeConstants.OUTTAKE_RPM));
     }
 
-    public Command stopMotor() {
+    public Command stopMotorCommand() {
         return run(this::stopIntaking);
-    }
-
-    /** @return Command that toggles between up and off, and down and spinning */
-    public Command toggleUpAndDownCommand() {
-        if (isUp) {
-            return lowerIntakeCommand().andThen(intake());
-        }
-        else {
-            return stopMotor().andThen(raiseIntakeCommand());
-        }
     }
 
     /** Rotates the intake until it is in index position. */
@@ -121,4 +111,8 @@ public final class IntakeSubsystem extends SubsystemBase {
     
     private boolean atIntakePosition() { return intakePositionLimit.get(); }
     private boolean atIndexPosition() { return indexPositionLimit.get(); }
+
+    public boolean isUp() {
+        return isUp;
+    }
 }

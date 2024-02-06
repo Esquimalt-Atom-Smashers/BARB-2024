@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import frc.lib.controller.LogitechController;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.subsystems.*;
@@ -56,10 +57,14 @@ public class RobotContainer {
 
         // driverControllerLogitech.getA().onTrue(swerveDriveSubsystem.rotateCenterApriltagCommand(() -> 0.2, limelightSubsystem.getAprilTagXOffset()));
         // operatorControllerLogitech.getA().onTrue(shooterSubsystem.shootManuallyWithTimeout(-1));
-        driverControllerLogitech.getA().onTrue(shooterSubsystem.shootAtVoltage(0.5));
-        driverControllerLogitech.getB().onTrue(shooterSubsystem.shootAtVoltage(-0.5));
+        driverControllerLogitech.getA().onTrue(shooterSubsystem.shootAtVoltageCommand(0.5));
+        driverControllerLogitech.getB().onTrue(shooterSubsystem.shootAtVoltageCommand(-0.5));
 
-        operatorControllerLogitech.getA().onTrue(intakeSubsystem.toggleUpAndDownCommand());
+        // Toggle between the intake down and intake up
+        operatorControllerLogitech.getA().onTrue(new ConditionalCommand(
+            intakeSubsystem.lowerIntakeCommand(), 
+            intakeSubsystem.raiseIntakeCommand(), 
+            intakeSubsystem::isUp));
 
         // driveController.getA().whileTrue(
         // swerveDriveSubsystem.rotateCenterApriltagCommand(() -> 0.05,
