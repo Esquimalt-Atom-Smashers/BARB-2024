@@ -274,6 +274,7 @@ public final class Constants {
     }
     
     public static class TrapDoorConstants {
-        public static final int SOLENOID = -1;
+        public static final int FORWARD_PORT = -1;
+        public static final int REVERSE_PORT = -1;
     }
 }

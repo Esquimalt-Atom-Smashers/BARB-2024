@@ -40,6 +40,7 @@ public class RobotContainer {
     private final SwerveDriveSubsystem swerveDriveSubsystem = new SwerveDriveSubsystem();
     private final LimelightSubsystem limelightSubsystem = new LimelightSubsystem();
     private final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
+    private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
 
     // private final BlinkinSubsystem blinkinSubsystem = new BlinkinSubsystem();
 
@@ -55,8 +56,10 @@ public class RobotContainer {
 
         // driverControllerLogitech.getA().onTrue(swerveDriveSubsystem.rotateCenterApriltagCommand(() -> 0.2, limelightSubsystem.getAprilTagXOffset()));
         // operatorControllerLogitech.getA().onTrue(shooterSubsystem.shootManuallyWithTimeout(-1));
-        driverControllerLogitech.getA().onTrue(shooterSubsystem.shootManually(0.5));
-        driverControllerLogitech.getB().onTrue(shooterSubsystem.shootManually(-0.5));
+        driverControllerLogitech.getA().onTrue(shooterSubsystem.shootAtVoltage(0.5));
+        driverControllerLogitech.getB().onTrue(shooterSubsystem.shootAtVoltage(-0.5));
+
+        operatorControllerLogitech.getA().onTrue(intakeSubsystem.toggleUpAndDownCommand());
 
         // driveController.getA().whileTrue(
         // swerveDriveSubsystem.rotateCenterApriltagCommand(() -> 0.05,
