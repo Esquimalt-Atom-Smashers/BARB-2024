@@ -24,8 +24,7 @@ public final class IntakeSubsystem extends SubsystemBase {
     private final DigitalInput intakePositionLimit;
     private final DigitalInput indexPositionLimit;
 
-    // Command to rotate until it hits one of the limit switches
-    // Command to rotate until it hits the other limit switch
+    private boolean isUp = true;
 
     public IntakeSubsystem() {
         rotationMotor = new CANSparkMax(-1, MotorType.kBrushless);
@@ -66,26 +65,32 @@ public final class IntakeSubsystem extends SubsystemBase {
         rotationController.setOutputRange(-1, 1);
     }
 
-    public Command intakeNote() {
+    public Command intakeCommand() {
         return run(() -> intake(IntakeConstants.INTAKE_RPM));
     }
 
-    public Command outtakeNote() {
+    public Command outtakeCommand() {
         return run(() -> outtake(IntakeConstants.OUTTAKE_RPM));
     }
 
-    public Command stopIntakeMotor() {
-        return run((this::stopIntaking));
+    public Command stopMotorCommand() {
+        return run(this::stopIntaking);
     }
 
     /** Rotates the intake until it is in index position. */
-    public Command intakeToIndexPosition() {
-        return run(() -> rotateIntake(IntakeConstants.INTAKE_TO_INDEX_RPM)).until(this::atIndexPosition).andThen(this::stopRotation);
+    public Command raiseIntakeCommand() {
+        return run(() -> {
+            isUp = true;
+            rotateIntake(IntakeConstants.INTAKE_TO_INDEX_RPM);
+        }).until(this::atIndexPosition).andThen(this::stopRotation);
     }
 
     /** Rotates the intake until it is in intake position */
-    public Command intakeToIntakePosition() {
-        return run(() -> rotateIntake(IntakeConstants.INTAKE_TO_INTAKE_RPM)).until(this::atIntakePosition).andThen(this::stopRotation);
+    public Command lowerIntakeCommand() {
+        return run(() -> {
+            isUp = false;
+            rotateIntake(IntakeConstants.INTAKE_TO_INTAKE_RPM);
+        }).until(this::atIntakePosition).andThen(this::stopRotation);
     }                                                                                                    
 
     private void rotateIntake(double rpm) {
@@ -94,19 +99,20 @@ public final class IntakeSubsystem extends SubsystemBase {
     }
 
     private void intake(double rpm) {
-        intakeController.setReference(MathUtil.clamp(rpm, rpm, IntakeConstants.INTAKE_MAX_RPM)
-        , ControlType.kVelocity);
+        intakeController.setReference(MathUtil.clamp(rpm, rpm, IntakeConstants.INTAKE_MAX_RPM), ControlType.kVelocity);
     }
 
     private void outtake(double rpm) {
-        intakeController.setReference(-MathUtil.clamp(rpm, rpm, IntakeConstants.OUTTAKE_MAX_RPM)
-        , ControlType.kVelocity);
+        intakeController.setReference(-MathUtil.clamp(rpm, rpm, IntakeConstants.OUTTAKE_MAX_RPM) , ControlType.kVelocity);
     }
 
     private void stopRotation() { rotationMotor.set(0); }
     private void stopIntaking() { intakeMotor.set(0); }
     
-
     private boolean atIntakePosition() { return intakePositionLimit.get(); }
     private boolean atIndexPosition() { return indexPositionLimit.get(); }
+
+    public boolean isUp() {
+        return isUp;
+    }
 }

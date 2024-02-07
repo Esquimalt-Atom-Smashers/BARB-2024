@@ -37,12 +37,12 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     /** Max speed supplier. */
     private DoubleSupplier maxSpeedSupplier = () -> Constants.SwerveConstants.maxSpeed;
 
+    private SwerveDriveOdometry odometry;
+    
     /**
      * Constructs a SwerveDriveSubsystem object.
      * Initializes the gyro, modules, and any autonmous variables.
      */
-    private SwerveDriveOdometry odometry;
-
     public SwerveDriveSubsystem() {
         gyro = new ADISGyro();
 
@@ -55,7 +55,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
         odometry = new SwerveDriveOdometry(Constants.SwerveConstants.swerveKinematics, getGyroRotation(), getModulePositions());
 
-        //Configures pathplanner
+        // Configures pathplanner
         AutoBuilder.configureHolonomic(
             this::getPose, 
             this::resetPose, 
