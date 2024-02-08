@@ -61,10 +61,7 @@ public class RobotContainer {
         driverControllerLogitech.getB().onTrue(shooterSubsystem.shootAtVoltageCommand(-0.5));
 
         // Toggle between the intake down and intake up
-        operatorControllerLogitech.getA().onTrue(new ConditionalCommand(
-            intakeSubsystem.lowerIntakeCommand(), 
-            intakeSubsystem.raiseIntakeCommand(), 
-            intakeSubsystem::isUp));
+        operatorControllerLogitech.getA().onTrue(intakeSubsystem.toggleUpAndDownCommand());
 
         // driveController.getA().whileTrue(
         // swerveDriveSubsystem.rotateCenterApriltagCommand(() -> 0.05,
