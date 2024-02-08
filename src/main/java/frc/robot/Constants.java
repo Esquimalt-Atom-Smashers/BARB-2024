@@ -255,8 +255,8 @@ public final class Constants {
     }
 
     public static class ShooterConstants {
-        public static final int LEFT_SHOOTER_PORT = -1;
-        public static final int RIGHT_SHOOTER_PORT = -1;
+        public static final int LEFT_SHOOTER_PORT = 2;
+        public static final int RIGHT_SHOOTER_PORT = 1;
 
         public static final double VOLTAGE_COMPENSATION = 12.2;
 

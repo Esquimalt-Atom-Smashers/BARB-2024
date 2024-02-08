@@ -1,0 +1,49 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 1.39,
+      "y": 7.0
+    },
+    "rotation": 0.0
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "AutoLowerIntake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Move to Note (Amp)"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AutoRaiseIntake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Move to Start (Amp)"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AutoShoot"
+          }
+        }
+      ]
+    }
+  },
+  "folder": null,
+  "choreoAuto": false
+}
