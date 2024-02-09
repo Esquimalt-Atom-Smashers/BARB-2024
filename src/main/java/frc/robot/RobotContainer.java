@@ -9,11 +9,13 @@ import static edu.wpi.first.wpilibj2.command.Commands.*;
 import java.util.Objects;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controller.LogitechController;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.subsystems.*;
@@ -29,7 +31,10 @@ import frc.robot.subsystems.BlinkinSubsystem.BlinkinValue;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
-    private final LogitechController driverControllerLogitech = new LogitechController(0);
+    private final boolean usingXBox;
+    private LogitechController driverLogitechController;
+    private XboxController driverXBoxController;
+    private XboxController operatorXBoxController;
     // private final LogitechController operatorControllerLogitech = new LogitechController(1);
 
     // private final LogitechController operatorController = new
@@ -41,32 +46,44 @@ public class RobotContainer {
     private final SwerveDriveSubsystem swerveDriveSubsystem = new SwerveDriveSubsystem();
     private final LimelightSubsystem limelightSubsystem = new LimelightSubsystem();
     private final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
-    // private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
+    private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
 
     // private final BlinkinSubsystem blinkinSubsystem = new BlinkinSubsystem();
 
-    public RobotContainer(TimedRobot robot) {
-        configureBindings();
+    public RobotContainer(TimedRobot robot, boolean usingXBox) {
+        this.usingXBox = usingXBox;
+        if (usingXBox) {
+            driverXBoxController = new XboxController(0);
+            operatorXBoxController = new XboxController(1);
+            configureXBoxBindings();
+        }
+        else {
+            driverLogitechController = new LogitechController(0);
+            configureLogitechBindings();
+        }
     }
     
+// hi isaac!! -jake
+    private void configureLogitechBindings() {
+        if (driverLogitechController == null) return;
 
-    private void configureBindings() {
         swerveDriveSubsystem.setDefaultCommand(swerveDriveSubsystem.driveCommand(
-                driverControllerLogitech.getLeftYAxis(), driverControllerLogitech.getLeftXAxis(),
-                driverControllerLogitech.getRightXAxis(), false));
-
+                driverLogitechController.getLeftYAxis(), driverLogitechController.getLeftXAxis(),
+                driverLogitechController.getRightXAxis(), false));
+        
+                
         // driverControllerLogitech.getA().onTrue(swerveDriveSubsystem.rotateCenterApriltagCommand(() -> 0.2, limelightSubsystem.getAprilTagXOffset()));
         // operatorControllerLogitech.getA().onTrue(shooterSubsystem.shootManuallyWithTimeout(-1));
         // driverControllerLogitech.getA().onTrue(shooterSubsystem.shootAtVoltageCommand(0.5));
         // driverControllerLogitech.getB().onTrue(shooterSubsystem.shootAtVoltageCommand(-0.5));
 
-        driverControllerLogitech.getLeftBumper().whileTrue(shooterSubsystem.shootAtVoltageCommand(0.3)).onFalse(shooterSubsystem.shootAtVoltageCommand(0));
-        driverControllerLogitech.getRightBumper().whileTrue(shooterSubsystem.shootAtVoltageCommand(-0.3)).onFalse(shooterSubsystem.shootAtVoltageCommand(0));
+        driverLogitechController.getLeftBumper().whileTrue(shooterSubsystem.shootAtVoltageCommand(0.3)).onFalse(shooterSubsystem.shootAtVoltageCommand(0));
+        driverLogitechController.getRightBumper().whileTrue(shooterSubsystem.shootAtVoltageCommand(-0.3)).onFalse(shooterSubsystem.shootAtVoltageCommand(0));
 
-        driverControllerLogitech.getA().whileTrue(shooterSubsystem.shootAtVoltageCommand(0.5)).onFalse(shooterSubsystem.shootAtVoltageCommand(0));
-        driverControllerLogitech.getB().whileTrue(shooterSubsystem.shootAtVoltageCommand(-0.5)).onFalse(shooterSubsystem.shootAtVoltageCommand(0));
-        driverControllerLogitech.getX().whileTrue(shooterSubsystem.shootAtVoltageCommand(0.7)).onFalse(shooterSubsystem.shootAtVoltageCommand(0));
-        driverControllerLogitech.getY().whileTrue(shooterSubsystem.shootAtVoltageCommand(-0.7)).onFalse(shooterSubsystem.shootAtVoltageCommand(0));
+        driverLogitechController.getA().whileTrue(shooterSubsystem.shootAtVoltageCommand(0.5)).onFalse(shooterSubsystem.stopShootingCommand());
+        driverLogitechController.getB().whileTrue(shooterSubsystem.shootAtVoltageCommand(-0.5)).onFalse(shooterSubsystem.stopShootingCommand());
+        driverLogitechController.getX().whileTrue(shooterSubsystem.shootAtVoltageCommand(0.7)).onFalse(shooterSubsystem.stopShootingCommand());
+        driverLogitechController.getY().whileTrue(shooterSubsystem.shootAtVoltageCommand(-0.7)).onFalse(shooterSubsystem.stopShootingCommand());
 
         // Toggle between the intake down and intake up
         // operatorControllerLogitech.getA().onTrue(new ConditionalCommand(
@@ -81,20 +98,44 @@ public class RobotContainer {
         // shooterSubsystem.setDefaultCommand(shooterSubsystem.getDefaultCommand());
     }
 
+    public void configureXBoxBindings() {
+        if (driverXBoxController == null) return;
+
+        swerveDriveSubsystem.setDefaultCommand(swerveDriveSubsystem.driveCommand(
+            this::getDriveForwardAxis, 
+            this::getDriveStrafeAxis, 
+            this::getDriveRotationAxis, 
+            false));
+        
+        // Trigger toggleIntakTrigger = new Trigger(operatorXBoxController::getAButton)
+    }
+
     public double getDriveForwardAxis() {
-        return -forwardRateLimiter.calculate(
-            square(deadband(driverControllerLogitech.getLeftYAxis().getRaw(), 0.05)) * Constants.SwerveConstants.maxSpeed);
+        if (usingXBox)
+            return -forwardRateLimiter.calculate(
+                square(deadband(driverXBoxController.getRawAxis(1), 0.05)) * Constants.SwerveConstants.maxSpeed);
+        else
+            return -forwardRateLimiter.calculate(
+                square(deadband(driverLogitechController.getLeftYAxis().getRaw(), 0.05)) * Constants.SwerveConstants.maxSpeed);
     }
 
     public double getDriveStrafeAxis() {
+        if (usingXBox)
             return -forwardRateLimiter.calculate(
-                square(deadband(driverControllerLogitech.getLeftXAxis().getRaw(), 0.05)) * Constants.SwerveConstants.maxSpeed);
+                square(deadband(driverXBoxController.getRawAxis(0), 0.05)) * Constants.SwerveConstants.maxSpeed);
+        else 
+            return -forwardRateLimiter.calculate(
+                square(deadband(driverLogitechController.getLeftXAxis().getRaw(), 0.05)) * Constants.SwerveConstants.maxSpeed);
         
     }
 
     public double getDriveRotationAxis() {
+        if (usingXBox)
             return -forwardRateLimiter.calculate(
-                square(deadband(driverControllerLogitech.getRightXAxis().getRaw(), 0.05)) * Constants.SwerveConstants.maxAngularVelocity);
+                square(deadband(driverXBoxController.getRawAxis(4), 0.05)) * Constants.SwerveConstants.maxSpeed);
+        else 
+            return -forwardRateLimiter.calculate(
+                square(deadband(driverLogitechController.getRightXAxis().getRaw(), 0.05)) * Constants.SwerveConstants.maxAngularVelocity);
         
     }
 
