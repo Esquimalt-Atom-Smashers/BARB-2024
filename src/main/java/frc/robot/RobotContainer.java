@@ -30,7 +30,7 @@ import frc.robot.subsystems.BlinkinSubsystem.BlinkinValue;
  */
 public class RobotContainer {
     private final LogitechController driverControllerLogitech = new LogitechController(0);
-    private final LogitechController operatorControllerLogitech = new LogitechController(1);
+    // private final LogitechController operatorControllerLogitech = new LogitechController(1);
 
     // private final LogitechController operatorController = new
     // LogitechController(ControllerConstants.OPERATOR_CONTROLLER);
@@ -41,7 +41,7 @@ public class RobotContainer {
     private final SwerveDriveSubsystem swerveDriveSubsystem = new SwerveDriveSubsystem();
     private final LimelightSubsystem limelightSubsystem = new LimelightSubsystem();
     private final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
-    private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
+    // private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
 
     // private final BlinkinSubsystem blinkinSubsystem = new BlinkinSubsystem();
 
@@ -52,19 +52,27 @@ public class RobotContainer {
 
     private void configureBindings() {
         swerveDriveSubsystem.setDefaultCommand(swerveDriveSubsystem.driveCommand(
-                this::getDriveForwardAxis, this::getDriveStrafeAxis,
-                this::getDriveRotationAxis, true));
+                driverControllerLogitech.getLeftYAxis(), driverControllerLogitech.getLeftXAxis(),
+                driverControllerLogitech.getRightXAxis(), false));
 
         // driverControllerLogitech.getA().onTrue(swerveDriveSubsystem.rotateCenterApriltagCommand(() -> 0.2, limelightSubsystem.getAprilTagXOffset()));
         // operatorControllerLogitech.getA().onTrue(shooterSubsystem.shootManuallyWithTimeout(-1));
-        driverControllerLogitech.getA().onTrue(shooterSubsystem.shootAtVoltageCommand(0.5));
-        driverControllerLogitech.getB().onTrue(shooterSubsystem.shootAtVoltageCommand(-0.5));
+        // driverControllerLogitech.getA().onTrue(shooterSubsystem.shootAtVoltageCommand(0.5));
+        // driverControllerLogitech.getB().onTrue(shooterSubsystem.shootAtVoltageCommand(-0.5));
+
+        driverControllerLogitech.getLeftBumper().whileTrue(shooterSubsystem.shootAtVoltageCommand(0.3)).onFalse(shooterSubsystem.shootAtVoltageCommand(0));
+        driverControllerLogitech.getRightBumper().whileTrue(shooterSubsystem.shootAtVoltageCommand(-0.3)).onFalse(shooterSubsystem.shootAtVoltageCommand(0));
+
+        driverControllerLogitech.getA().whileTrue(shooterSubsystem.shootAtVoltageCommand(0.5)).onFalse(shooterSubsystem.shootAtVoltageCommand(0));
+        driverControllerLogitech.getB().whileTrue(shooterSubsystem.shootAtVoltageCommand(-0.5)).onFalse(shooterSubsystem.shootAtVoltageCommand(0));
+        driverControllerLogitech.getX().whileTrue(shooterSubsystem.shootAtVoltageCommand(0.7)).onFalse(shooterSubsystem.shootAtVoltageCommand(0));
+        driverControllerLogitech.getY().whileTrue(shooterSubsystem.shootAtVoltageCommand(-0.7)).onFalse(shooterSubsystem.shootAtVoltageCommand(0));
 
         // Toggle between the intake down and intake up
-        operatorControllerLogitech.getA().onTrue(new ConditionalCommand(
-            intakeSubsystem.lowerIntakeCommand(), 
-            intakeSubsystem.raiseIntakeCommand(), 
-            intakeSubsystem::isUp));
+        // operatorControllerLogitech.getA().onTrue(new ConditionalCommand(
+        //     intakeSubsystem.lowerIntakeCommand(), 
+        //     intakeSubsystem.raiseIntakeCommand(), 
+        //     intakeSubsystem::isUp));
 
         // driveController.getA().whileTrue(
         // swerveDriveSubsystem.rotateCenterApriltagCommand(() -> 0.05,

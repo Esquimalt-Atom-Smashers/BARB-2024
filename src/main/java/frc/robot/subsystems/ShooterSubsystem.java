@@ -32,6 +32,7 @@ public class ShooterSubsystem extends SubsystemBase {
         leftShooterMotor = new CANSparkMax(Constants.ShooterConstants.LEFT_SHOOTER_PORT, MotorType.kBrushless);
         rightShooterMotor = new CANSparkMax(Constants.ShooterConstants.RIGHT_SHOOTER_PORT, MotorType.kBrushless);
 
+        rightShooterMotor.setInverted(true);
         leftPIDController = leftShooterMotor.getPIDController();
         rightPIDController = rightShooterMotor.getPIDController();
         
@@ -127,7 +128,7 @@ public class ShooterSubsystem extends SubsystemBase {
      */
     private void setVoltage(double voltage) {
         leftShooterMotor.set(voltage);
-        rightShooterMotor.set(voltage);
+        rightShooterMotor.set(voltage * 1.10);
     }
     
     /**
