@@ -44,12 +44,13 @@ public class RobotContainer {
     public static SlewRateLimiter forwardRateLimiter = new SlewRateLimiter(40, -40, 0);
     public static SlewRateLimiter strafeRateLimiter = new SlewRateLimiter(40, -40, 0);
 
+    /** The swerve drive base of the robot */
     private final SwerveDriveSubsystem swerveDriveSubsystem = new SwerveDriveSubsystem();
     private final LimelightSubsystem limelightSubsystem = new LimelightSubsystem();
+    /** The shooter on the robot */
     private final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
     // private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
     // private final TrapDoorSubsystem trapDoorSubsystem = new TrapDoorSubsystem();
-
     // private final BlinkinSubsystem blinkinSubsystem = new BlinkinSubsystem();
 
     public RobotContainer(TimedRobot robot, boolean usingXBox) {
@@ -65,7 +66,7 @@ public class RobotContainer {
         }
     }
     
-// hi isaac!! -jake
+    /** Configure the controls for the logitech controller */
     private void configureLogitechBindings() {
         if (driverLogitechController == null) return;
 
@@ -100,6 +101,7 @@ public class RobotContainer {
         // shooterSubsystem.setDefaultCommand(shooterSubsystem.getDefaultCommand());
     }
 
+    /** Configuer the controls for using the XBox controllers */
     public void configureXBoxBindings() {
         if (driverXBoxController == null) return;
 
@@ -108,6 +110,7 @@ public class RobotContainer {
             this::getDriveStrafeAxis, 
             this::getDriveRotationAxis, 
             // TODO: Possibly make a button to swap field centric
+            // This would require replacing the boolean in driveCommand with a BooleanSupplier
             false)
         );
 
@@ -124,7 +127,7 @@ public class RobotContainer {
         // new Trigger(operatorXBoxController::getBButton).onTrue(
         //     shooterSubsystem.shootAtVoltageCommand(0.5).andThen(
         //         intakeSubsystem.outtakeCommand(),
-        //         // Wait for the note to shoot (probably way too much time)
+        //         // Wait for the note to shoot (probably way more than enough time)
         //         new WaitCommand(2),
         //         shooterSubsystem.stopShootingCommand().alongWith(intakeSubsystem.stopMotorCommand())
         //     ));
@@ -134,49 +137,68 @@ public class RobotContainer {
         //         // Wait for the pneumatics to extend
         //         new WaitCommand(0.5),
         //         intakeSubsystem.outtakeCommand(),
-        //         // Wait for the note to shoot (probably way too much time)
+        //         // Wait for the note to shoot (probably more than enough time)
         //         new WaitCommand(2),
         //         shooterSubsystem.stopShootingCommand().alongWith(intakeSubsystem.stopMotorCommand(), trapDoorSubsystem.retractCommand())
         //     )
         // );
     }
 
+    /** @return The axis used to drive forwards, scaled and limited by the slew rate limiter */
     public double getDriveForwardAxis() {
         if (usingXBox)
             return -forwardRateLimiter.calculate(
-                square(deadband(driverXBoxController.getRawAxis(1), 0.05)) * Constants.SwerveConstants.maxSpeed);
+                    square(driverXBoxController.getRawAxis(1)) * Constants.SwerveConstants.maxSpeed);
         else
             return -forwardRateLimiter.calculate(
                 square(deadband(driverLogitechController.getLeftYAxis().getRaw(), 0.05)) * Constants.SwerveConstants.maxSpeed);
     }
-
+        
+    /** @return The axis used to strafe, scaled and limited by the slew rate limiter */
     public double getDriveStrafeAxis() {
         if (usingXBox)
             return -forwardRateLimiter.calculate(
-                square(deadband(driverXBoxController.getRawAxis(0), 0.05)) * Constants.SwerveConstants.maxSpeed);
+                square(driverXBoxController.getRawAxis(0)) * Constants.SwerveConstants.maxSpeed);
         else 
             return -forwardRateLimiter.calculate(
                 square(deadband(driverLogitechController.getLeftXAxis().getRaw(), 0.05)) * Constants.SwerveConstants.maxSpeed);
-        
+            
     }
-
+                
+    /** @return The axis used to turn, scaled and limited by the slew rate limiter */
     public double getDriveRotationAxis() {
         if (usingXBox)
             return -forwardRateLimiter.calculate(
-                square(deadband(driverXBoxController.getRawAxis(4), 0.05)) * Constants.SwerveConstants.maxSpeed);
+                square(driverXBoxController.getRawAxis(4)) * Constants.SwerveConstants.maxSpeed);
         else 
             return -forwardRateLimiter.calculate(
                 square(deadband(driverLogitechController.getRightXAxis().getRaw(), 0.05)) * Constants.SwerveConstants.maxAngularVelocity);
         
     }
 
+    /**
+     * Takes a value and a tolerance and determines if the absolute value of value is greater that the tolerance. 
+     * If it is, returns 0, else returns value.
+     * 
+     * @param value The value to check
+     * @param tolerance The tolerance for the value
+     * @return The value, if the magnitude of value if greater than tolerance
+     */
     private static double deadband(double value, double tolerance) {
         if (Math.abs(value) < tolerance)
             return 0.0;
 
-        return Math.copySign(value, (value - tolerance) / (1.0 - tolerance));
+        // This isn't achieving much
+        // return Math.copySign(value, (value - tolerance) / (1.0 - tolerance));
+        return value;
     }
 
+    /**
+     * Takes a value and squares it, keeping its sign the same. Equivalent to |value| * value.
+     * 
+     * @param value The value to square
+     * @return The squared value, with the same sign as the original value
+     */
     private static double square(double value) {
         return Math.copySign(value * value, value);
     }
