@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controller.LogitechController;
 import frc.robot.Constants.ControllerConstants;
@@ -46,7 +47,8 @@ public class RobotContainer {
     private final SwerveDriveSubsystem swerveDriveSubsystem = new SwerveDriveSubsystem();
     private final LimelightSubsystem limelightSubsystem = new LimelightSubsystem();
     private final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
-    private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
+    // private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
+    // private final TrapDoorSubsystem trapDoorSubsystem = new TrapDoorSubsystem();
 
     // private final BlinkinSubsystem blinkinSubsystem = new BlinkinSubsystem();
 
@@ -105,9 +107,38 @@ public class RobotContainer {
             this::getDriveForwardAxis, 
             this::getDriveStrafeAxis, 
             this::getDriveRotationAxis, 
-            false));
+            // TODO: Possibly make a button to swap field centric
+            false)
+        );
+
+        // Currently these are pretty basic commands, to be used for testing
         
-        // Trigger toggleIntakTrigger = new Trigger(operatorXBoxController::getAButton)
+        // new Trigger(operatorXBoxController::getAButton).onTrue(intakeSubsystem.toggleUpAndDownCommand());
+
+        // new Trigger(operatorXBoxController::getXButton)
+        //     .onTrue(intakeSubsystem.outtakeCommand())
+        //     .onFalse(
+        //         new ConditionalCommand(intakeSubsystem.stopMotorCommand(), intakeSubsystem.intakeCommand(), intakeSubsystem::isUp)
+        // );
+
+        // new Trigger(operatorXBoxController::getBButton).onTrue(
+        //     shooterSubsystem.shootAtVoltageCommand(0.5).andThen(
+        //         intakeSubsystem.outtakeCommand(),
+        //         // Wait for the note to shoot (probably way too much time)
+        //         new WaitCommand(2),
+        //         shooterSubsystem.stopShootingCommand().alongWith(intakeSubsystem.stopMotorCommand())
+        //     ));
+        
+        // new Trigger(operatorXBoxController::getYButton).onTrue(
+        //     trapDoorSubsystem.extendCommand().alongWith(shooterSubsystem.shootAtVelocityCommand(0.5)).andThen(
+        //         // Wait for the pneumatics to extend
+        //         new WaitCommand(0.5),
+        //         intakeSubsystem.outtakeCommand(),
+        //         // Wait for the note to shoot (probably way too much time)
+        //         new WaitCommand(2),
+        //         shooterSubsystem.stopShootingCommand().alongWith(intakeSubsystem.stopMotorCommand(), trapDoorSubsystem.retractCommand())
+        //     )
+        // );
     }
 
     public double getDriveForwardAxis() {
