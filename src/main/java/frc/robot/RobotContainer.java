@@ -9,16 +9,20 @@ import static edu.wpi.first.wpilibj2.command.Commands.*;
 import java.util.Objects;
 
 import edu.wpi.first.math.filter.SlewRateLimiter;
+import edu.wpi.first.wpilibj.DoubleSolenoid;
 import edu.wpi.first.wpilibj.GenericHID;
+import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controller.LogitechController;
 import frc.robot.Constants.ControllerConstants;
+import frc.robot.Constants.ShooterConstants;
 import frc.robot.subsystems.*;
 import frc.robot.subsystems.BlinkinSubsystem.BlinkinValue;
 
@@ -49,8 +53,8 @@ public class RobotContainer {
     private final LimelightSubsystem limelightSubsystem = new LimelightSubsystem();
     /** The shooter on the robot */
     private final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
-    // private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
-    // private final TrapDoorSubsystem trapDoorSubsystem = new TrapDoorSubsystem();
+    private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
+    private final TrapDoorSubsystem trapDoorSubsystem = new TrapDoorSubsystem();
     // private final BlinkinSubsystem blinkinSubsystem = new BlinkinSubsystem();
 
     public RobotContainer(TimedRobot robot, boolean usingXBox) {
@@ -73,20 +77,33 @@ public class RobotContainer {
         swerveDriveSubsystem.setDefaultCommand(swerveDriveSubsystem.driveCommand(
                 driverLogitechController.getLeftYAxis(), driverLogitechController.getLeftXAxis(),
                 driverLogitechController.getRightXAxis(), false));
-        
+
+        driverLogitechController.getDPadLeft().onTrue(swerveDriveSubsystem.snap90LeftCommand());
+        driverLogitechController.getDPadRight().onTrue(swerveDriveSubsystem.snap90RightCommand());
+
+        driverLogitechController.getLeftTrigger().whileTrue(swerveDriveSubsystem.enableSlowMode()).onFalse(swerveDriveSubsystem.disableSlowMode());
+
+        driverLogitechController.getDPadLeft().onTrue(shooterSubsystem.setAppliedVoltage(0.02));
+        driverLogitechController.getDPadRight().onTrue(shooterSubsystem.setAppliedVoltage(-0.02));
                 
         // driverControllerLogitech.getA().onTrue(swerveDriveSubsystem.rotateCenterApriltagCommand(() -> 0.2, limelightSubsystem.getAprilTagXOffset()));
         // operatorControllerLogitech.getA().onTrue(shooterSubsystem.shootManuallyWithTimeout(-1));
-        // driverControllerLogitech.getA().onTrue(shooterSubsystem.shootAtVoltageCommand(0.5));
-        // driverControllerLogitech.getB().onTrue(shooterSubsystem.shootAtVoltageCommand(-0.5));
 
-        driverLogitechController.getLeftBumper().whileTrue(shooterSubsystem.shootAtVoltageCommand(0.3)).onFalse(shooterSubsystem.shootAtVoltageCommand(0));
-        driverLogitechController.getRightBumper().whileTrue(shooterSubsystem.shootAtVoltageCommand(-0.3)).onFalse(shooterSubsystem.shootAtVoltageCommand(0));
+        driverLogitechController.getDPadUp().whileTrue(trapDoorSubsystem.extendCommand()).onFalse(trapDoorSubsystem.stopCommand());
+        driverLogitechController.getDPadDown().whileTrue(trapDoorSubsystem.retractCommand()).onFalse(trapDoorSubsystem.stopCommand());
+        // driverLogitechController.getDPadUp().whileTrue(trapDoorSubsystem.extendCommand()).onFalse(trapDoorSubsystem.stopCommand());
+        // driverLogitechController.getDPadDown().whileTrue(trapDoorSubsystem.retractCommand()).onFalse(trapDoorSubsystem.stopCommand());
+        // driverLogitechController.getLeftBumper().whileTrue(shooterSubsystem.shootAtVoltageCommand(ShooterSubsystem.appliedVoltage)).onFalse(shooterSubsystem.shootAtVoltageCommand(0));
+        // driverLogitechController.getRightBumper().whileTrue(shooterSubsystem.shootAtVoltageCommand(-ShooterSubsystem.appliedVoltage)).onFalse(shooterSubsystem.shootAtVoltageCommand(0));
 
-        driverLogitechController.getA().whileTrue(shooterSubsystem.shootAtVoltageCommand(0.5)).onFalse(shooterSubsystem.stopShootingCommand());
-        driverLogitechController.getB().whileTrue(shooterSubsystem.shootAtVoltageCommand(-0.5)).onFalse(shooterSubsystem.stopShootingCommand());
-        driverLogitechController.getX().whileTrue(shooterSubsystem.shootAtVoltageCommand(0.7)).onFalse(shooterSubsystem.stopShootingCommand());
-        driverLogitechController.getY().whileTrue(shooterSubsystem.shootAtVoltageCommand(-0.7)).onFalse(shooterSubsystem.stopShootingCommand());
+        driverLogitechController.getA().whileTrue(shooterSubsystem.shootAtVoltageCommand(ShooterSubsystem.appliedVoltage)).onFalse(shooterSubsystem.stopShootingCommand());
+    
+        driverLogitechController.getX().whileTrue(intakeSubsystem.intakeCommand()).onFalse(intakeSubsystem.stopMotorCommand());
+        driverLogitechController.getY().whileTrue(intakeSubsystem.outtakeCommand()).onFalse(intakeSubsystem.stopMotorCommand());
+        driverLogitechController.getLeftBumper().whileTrue(intakeSubsystem.raiseIntakeCommand()).onFalse(intakeSubsystem.stopRotatingIntake());
+        driverLogitechController.getRightBumper().whileTrue(intakeSubsystem.lowerIntakeCommand()).onFalse(intakeSubsystem.stopRotatingIntake());     // driverLogitechController.getB().whileTrue(shooterSubsystem.shootAtVoltageCommand(-0.5)).onFalse(shooterSubsystem.stopShootingCommand());
+        // driverLogitechController.getX().whileTrue(shooterSubsystem.shootAtVoltageCommand(0.7)).onFalse(shooterSubsystem.stopShootingCommand());
+        // driverLogitechController.getY().whileTrue(shooterSubsystem.shootAtVoltageCommand(-0.7)).onFalse(shooterSubsystem.stopShootingCommand());
 
         // Toggle between the intake down and intake up
         // operatorControllerLogitech.getA().onTrue(new ConditionalCommand(
@@ -157,7 +174,7 @@ public class RobotContainer {
     /** @return The axis used to strafe, scaled and limited by the slew rate limiter */
     public double getDriveStrafeAxis() {
         if (usingXBox)
-            return -forwardRateLimiter.calculate(
+            return -strafeRateLimiter.calculate(
                 square(driverXBoxController.getRawAxis(0)) * Constants.SwerveConstants.maxSpeed);
         else 
             return -forwardRateLimiter.calculate(
@@ -168,7 +185,7 @@ public class RobotContainer {
     /** @return The axis used to turn, scaled and limited by the slew rate limiter */
     public double getDriveRotationAxis() {
         if (usingXBox)
-            return -forwardRateLimiter.calculate(
+            return -strafeRateLimiter.calculate(
                 square(driverXBoxController.getRawAxis(4)) * Constants.SwerveConstants.maxSpeed);
         else 
             return -forwardRateLimiter.calculate(

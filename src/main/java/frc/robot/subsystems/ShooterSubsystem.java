@@ -23,6 +23,7 @@ public class ShooterSubsystem extends SubsystemBase {
     private final SparkPIDController leftPIDController;
     private final SparkPIDController rightPIDController;
     
+    public static double appliedVoltage = 0;
     /**
      * Constructs a ShooterSubsystem object.
      * Initializes the two motors and their PID controllers, which
@@ -39,6 +40,13 @@ public class ShooterSubsystem extends SubsystemBase {
         configureMotors();
     }
 
+
+    public Command setAppliedVoltage(double voltage) {
+        return runOnce(() -> {
+            ShooterSubsystem.appliedVoltage += voltage;
+            System.out.println("Current Applied Voltage: " + ShooterSubsystem.appliedVoltage);
+        });
+    }
     /**
      * Configure the motors and their PID controllers. 
      */

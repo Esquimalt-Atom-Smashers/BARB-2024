@@ -10,7 +10,10 @@ import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
+import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants;
 import frc.robot.Constants.IntakeConstants;
 
@@ -19,14 +22,15 @@ import frc.robot.Constants.IntakeConstants;
  */
 public final class IntakeSubsystem extends SubsystemBase {
     /** Motor for rotating the intake into intake and index position. */
+    private boolean hasNote = false;
     private final CANSparkMax rotationMotor;
     private final CANSparkMax intakeMotor;
 
     private final SparkPIDController intakeController;
     private final SparkPIDController rotationController;
 
-    private final DigitalInput intakePositionLimit;
-    private final DigitalInput indexPositionLimit;
+    // private final DigitalInput intakePositionLimit;
+    // private final DigitalInput indexPositionLimit;
 
     private boolean isUp = true;
 
@@ -43,8 +47,17 @@ public final class IntakeSubsystem extends SubsystemBase {
         intakeController = intakeMotor.getPIDController();
         configureIntakeMotor();
 
-        intakePositionLimit = new DigitalInput(IntakeConstants.INTAKE_LIMIT_SWITCH_PORT);
-        indexPositionLimit = new DigitalInput(IntakeConstants.INDEX_LIMIT_SWITCH_PORT);
+        // intakePositionLimit = new DigitalInput(IntakeConstants.INTAKE_LIMIT_SWITCH_PORT);
+        // indexPositionLimit = new DigitalInput(IntakeConstants.INDEX_LIMIT_SWITCH_PORT);
+    }
+
+    @Override
+    public void periodic() {
+        System.out.println("Intake Motor Output Current: " + intakeMotor.getOutputCurrent());
+        System.out.println("Hasnote: " + hasNote);
+        if (intakeMotor.getOutputCurrent() > 25) {
+            hasNote = true;
+        }
     }
 
     /**
@@ -54,13 +67,15 @@ public final class IntakeSubsystem extends SubsystemBase {
         intakeMotor.setIdleMode(IdleMode.kBrake);
         intakeMotor.enableVoltageCompensation(IntakeConstants.INTAKE_MAX_VOLTAGE);
         intakeMotor.setInverted(IntakeConstants.INTAKE_MOTOR_INVERTED);
+        intakeMotor.burnFlash();
+        // intakeMotor.setOpenLoopRampRate(2);
 
-        intakeController.setP(IntakeConstants.INTAKE_CONTROLLER_KP);
-        intakeController.setI(IntakeConstants.INTAKE_CONTROLLER_KI);
-        intakeController.setD(IntakeConstants.INTAKE_CONTROLLER_KD);
-        intakeController.setIZone(IntakeConstants.INTAKE_CONTROLLER_IZ);
-        intakeController.setFF(IntakeConstants.INTAKE_CONTROLLER_FF);
-        intakeController.setOutputRange(-1, 1);
+        // intakeController.setP(IntakeConstants.INTAKE_CONTROLLER_KP);
+        // intakeController.setI(IntakeConstants.INTAKE_CONTROLLER_KI);
+        // intakeController.setD(IntakeConstants.INTAKE_CONTROLLER_KD);
+        // intakeController.setIZone(IntakeConstants.INTAKE_CONTROLLER_IZ);
+        // intakeController.setFF(IntakeConstants.INTAKE_CONTROLLER_FF);
+        // intakeController.setOutputRange(-1, 1);
     }
 
     /**
@@ -70,6 +85,7 @@ public final class IntakeSubsystem extends SubsystemBase {
         rotationMotor.setIdleMode(IdleMode.kBrake);
         rotationMotor.enableVoltageCompensation(Constants.IntakeConstants.ROTATION_MAX_VOLTAGE);
         rotationMotor.setInverted(IntakeConstants.ROTATION_MOTOR_INVERTED);
+        rotationMotor.burnFlash();
 
         rotationController.setP(IntakeConstants.ROTATION_CONTROLLER_KP);
         rotationController.setI(IntakeConstants.ROTATION_CONTROLLER_KI);
@@ -81,13 +97,18 @@ public final class IntakeSubsystem extends SubsystemBase {
 
     /** @return Command that starts intaking */
     public Command intakeCommand() {
-        return runOnce(() -> intake(IntakeConstants.INTAKE_RPM));
+        return new ParallelDeadlineGroup(new WaitUntilCommand(() -> hasNote), new InstantCommand(() -> intakeMotor.set(0.5))).andThen(stopMotorCommand());
+        // return runOnce(() -> intakeMotor.set(hasNote ? 0 : 0.5));
+    }
+
+    public Command outtakeCommand() {
+        return runOnce(() -> intakeMotor.set(-0.5)).andThen(() -> hasNote = false, this);
     }
 
     /** @return Command that starts outtaking */
-    public Command outtakeCommand() {
-        return runOnce(() -> outtake(IntakeConstants.OUTTAKE_RPM));
-    }
+    // public Command outtakeCommand() {
+    //     return runOnce(() -> outtake(IntakeConstants.OUTTAKE_RPM));
+    // }
 
     /** @reutrn Command that stops the intake motor */
     public Command stopMotorCommand() {
@@ -105,19 +126,26 @@ public final class IntakeSubsystem extends SubsystemBase {
 
     /** Rotates the intake until it is in index position */
     public Command raiseIntakeCommand() {
-        return run(() -> {
-            isUp = true;
-            rotateIntake(IntakeConstants.INTAKE_TO_INDEX_RPM);
-        }).until(this::atIndexPosition).andThen(this::stopRotation);
+        // return run(() -> {
+        //     isUp = true;
+        //     rotateIntake(IntakeConstants.INTAKE_TO_INDEX_RPM);
+        // }).until(this::atIndexPosition).andThen(this::stopRotation);
+        return runOnce(() -> rotationMotor.set(-0.1));
     }
 
     /** Rotates the intake until it is in intake position */
     public Command lowerIntakeCommand() {
-        return run(() -> {
-            isUp = false;
-            rotateIntake(IntakeConstants.INTAKE_TO_INTAKE_RPM);
-        }).until(this::atIntakePosition).andThen(this::stopRotation);
+        // return run(() -> {
+        //     isUp = false;
+        //     rotateIntake(IntakeConstants.INTAKE_TO_INTAKE_RPM);
+
+        // }).until(this::atIntakePosition).andThen(this::stopRotation);
+        return runOnce(() -> rotationMotor.set(0.1));
     }    
+
+    public Command stopRotatingIntake() {
+        return runOnce(() -> rotationMotor.set(0));
+    }
 
     /**
      * Rotate the intake at a specified velocity. 
@@ -158,14 +186,14 @@ public final class IntakeSubsystem extends SubsystemBase {
     }
     
     /** @reutrn True if the lower limit switch is being pressed */
-    private boolean atIntakePosition() {
-        return intakePositionLimit.get();
-    }
+    // private boolean atIntakePosition() {
+    //     return intakePositionLimit.get();
+    // }
 
-    /** @reutrn True if the upper limit switch is being pressed */
-    private boolean atIndexPosition() {
-        return indexPositionLimit.get();
-    }
+    // /** @reutrn True if the upper limit switch is being pressed */
+    // private boolean atIndexPosition() {
+    //     return indexPositionLimit.get();
+    // }
 
     /** @return True is the intake is up or moving to up, false otherwise */
     public boolean isUp() {

@@ -9,9 +9,11 @@ import edu.wpi.first.math.kinematics.SwerveModuleState;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.gyro.ADISGyro;
+import frc.lib.gyro.NavXGyro;
 import frc.lib.swerve.SwerveDriveSignal;
 import frc.lib.swerve.SwerveModule;
 import frc.robot.Constants;
+import frc.robot.Constants.SwerveConstants;
 
 import java.util.function.DoubleSupplier;
 
@@ -82,6 +84,44 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                     new ChassisSpeeds(forward.getAsDouble(), strafe.getAsDouble(), rotation.getAsDouble()),
                     isFieldOriented);
         });
+    }
+
+    public Command snap90LeftCommand() {
+        Rotation2d startingRotation = getRotation();
+        Rotation2d targetRotation = startingRotation.plus(new Rotation2d(Math.toRadians(90)));
+
+        return runOnce(() -> {
+            while (getRotation().getDegrees() < targetRotation.getDegrees()) {
+                setVelocity(new ChassisSpeeds(0,0,-SwerveConstants.maxAngularVelocity));
+            }
+            setVelocity(new ChassisSpeeds(0,0,0));
+        });
+    }
+
+    public Command snap90RightCommand() {
+        Rotation2d startingRotation = getRotation();
+        Rotation2d targetRotation = startingRotation.minus(new Rotation2d(Math.toRadians(90)));
+
+        return runOnce(() -> {
+            while (getRotation().getDegrees() < targetRotation.getDegrees()) {
+                setVelocity(new ChassisSpeeds(0,0,SwerveConstants.maxAngularVelocity));
+            }
+            setVelocity(new ChassisSpeeds(0,0,0));
+        });
+    }
+
+    public Command enableSlowMode() {
+        return runOnce(() -> {
+            setCustomMaxSpeedSupplier(() -> 1.5);
+        });
+    }
+
+    public Command disableSlowMode() {
+        return runOnce(() -> resetMaxSpeedSupplier());
+    }
+
+    private void resetMaxSpeedSupplier() {
+        this.maxSpeedSupplier = () -> SwerveConstants.maxSpeed;
     }
 
     /**
@@ -226,6 +266,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         updateModules(driveSignal);
         odometry.update(getGyroRotation(), getModulePositions());
 
+        //System.out.println(getPose());
     }
 
     /** Updates the current robot odometry. */

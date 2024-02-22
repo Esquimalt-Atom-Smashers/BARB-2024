@@ -11,14 +11,16 @@ import frc.robot.Constants;
  * Subsystem representing the pneumatics on the shooter.
  */
 public class TrapDoorSubsystem extends SubsystemBase {
-  private DoubleSolenoid solenoid;
+  private DoubleSolenoid leftSolenoid;
+  private DoubleSolenoid rightSolenoid;
 
   /**
    * Constructs a TrapDoorSubsystem object. 
    * Initializes the double solenoid that opens the trap door and lets us score into the amp.
    */
   public TrapDoorSubsystem(){
-    solenoid = new DoubleSolenoid(PneumaticsModuleType.REVPH, Constants.TrapDoorConstants.FORWARD_PORT, Constants.TrapDoorConstants.REVERSE_PORT);
+    leftSolenoid = new DoubleSolenoid(0, PneumaticsModuleType.CTREPCM, Constants.TrapDoorConstants.FORWARD_PORT, Constants.TrapDoorConstants.REVERSE_PORT);
+    rightSolenoid = new DoubleSolenoid(1, PneumaticsModuleType.CTREPCM, 0, 1);
   }
 
   /** @return Command that extends the pneumatics */
@@ -31,13 +33,24 @@ public class TrapDoorSubsystem extends SubsystemBase {
     return runOnce(this::retract);
   }
 
+  public Command stopCommand() {
+    return runOnce(this::stop);
+  }
+
   /** Extend the pneumatics */
   private void extend() {
-    solenoid.set(Value.kForward);
+    leftSolenoid.set(Value.kForward);
+    rightSolenoid.set(Value.kForward);
   }
 
   /** Retract the pnematics */
   private void retract() {
-    solenoid.set(Value.kReverse);
+    leftSolenoid.set(Value.kReverse);
+    rightSolenoid.set(Value.kReverse);
+  }
+
+  private void stop() {
+    leftSolenoid.set(Value.kOff);
+    rightSolenoid.set(Value.kOff);
   }
 }

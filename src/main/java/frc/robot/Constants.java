@@ -86,6 +86,8 @@ public final class Constants {
       public static final double drivePeakCurrentDuration = 0.1;
       public static final boolean driveEnableCurrentLimit = true;
 
+      public static double maxModuleSpeed = 1.25;
+
       /* Angle Motor PID Values */
       public static final double angleKP = 45; // 43
       public static final double angleKI = 0.0;
@@ -153,7 +155,7 @@ public final class Constants {
       public static final HolonomicPathFollowerConfig pathFollowerConfig = new HolonomicPathFollowerConfig(
       new PIDConstants(5.0, 0, 0), // Translation constants 
       new PIDConstants(5.0, 0, 0), // Rotation constants 
-      maxSpeed, 
+      maxModuleSpeed, 
       moduleTranslations[0].getNorm(), // Drive base radius (distance from center to furthest module) 
       new ReplanningConfig()
     );
@@ -209,8 +211,8 @@ public final class Constants {
 
     public static final class IntakeConstants {
         /** Hardware ports */
-        public static final int INTAKE_MOTOR_PORT = -1;
-        public static final int ROTATION_MOTOR_PORT = -1;
+        public static final int INTAKE_MOTOR_PORT = 3;
+        public static final int ROTATION_MOTOR_PORT = 4;
 
         public static final int INTAKE_LIMIT_SWITCH_PORT = -1;
         public static final int INDEX_LIMIT_SWITCH_PORT = -1;
@@ -274,7 +276,7 @@ public final class Constants {
     }
     
     public static class TrapDoorConstants {
-        public static final int FORWARD_PORT = -1;
-        public static final int REVERSE_PORT = -1;
+        public static final int FORWARD_PORT = 0;
+        public static final int REVERSE_PORT = 1;
     }
 }
