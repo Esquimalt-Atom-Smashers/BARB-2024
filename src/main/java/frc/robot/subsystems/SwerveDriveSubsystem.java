@@ -356,7 +356,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         update();
-        System.out.println("Gyro Rotation: " + gyro.getRotation2d());
+//        System.out.println("Gyro Rotation: " + gyro.getRotation2d());
     }
 
     /** @return the current states of all the swerve modules. */

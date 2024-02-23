@@ -21,7 +21,7 @@ public class ShooterSubsystem extends SubsystemBase {
     private final SparkPIDController leftPIDController;
     private final SparkPIDController rightPIDController;
     
-    public static double appliedVoltage = 0;
+    public double appliedVoltage = 0.30;
     /**
      * Constructs a ShooterSubsystem object.
      * Initializes the two motors and their PID controllers, which
@@ -38,11 +38,14 @@ public class ShooterSubsystem extends SubsystemBase {
         configureMotors();
     }
 
+    @Override
+    public void periodic(){
+        System.out.println(this.appliedVoltage);
+    }
 
     public Command setAppliedVoltage(double voltage) {
         return runOnce(() -> {
-            ShooterSubsystem.appliedVoltage += voltage;
-            System.out.println("Current Applied Voltage: " + ShooterSubsystem.appliedVoltage);
+            this.appliedVoltage += voltage;
         });
     }
     /**
@@ -87,8 +90,12 @@ public class ShooterSubsystem extends SubsystemBase {
      */
     public Command shootAtVoltageCommand(double voltage) {
         return runOnce(() -> setVoltage(voltage));
-    } 
-    
+    }
+    public Command shootAtVoltageCommand() {
+        return runOnce(() -> setVoltage(this.appliedVoltage));
+    }
+
+
     /**
      * Creates and returns a command that shoots at a specified voltage for a specified amount of time, then stops. 
      * 

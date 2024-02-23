@@ -8,6 +8,7 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -22,7 +23,7 @@ import frc.robot.Constants.IntakeConstants;
  */
 public final class IntakeSubsystem extends SubsystemBase {
     /** Motor for rotating the intake into intake and index position. */
-    private boolean hasNote = false;
+    public boolean hasNote = false;
     private final CANSparkMax rotationMotor;
     private final CANSparkMax intakeMotor;
 
@@ -53,11 +54,13 @@ public final class IntakeSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        System.out.println("Intake Motor Output Current: " + intakeMotor.getOutputCurrent());
-        System.out.println("Hasnote: " + hasNote);
+//        System.out.println("Intake Motor Output Current: " + intakeMotor.getOutputCurrent());
+//        System.out.println("Hasnote: " + hasNote);
         if (intakeMotor.getOutputCurrent() > 25) {
-            hasNote = true;
+            this.hasNote = true;
         }
+        System.out.println(this.hasNote);
+        SmartDashboard.putBoolean(" Note in Intake", this.hasNote);
     }
 
     /**
@@ -102,7 +105,7 @@ public final class IntakeSubsystem extends SubsystemBase {
     }
 
     public Command outtakeCommand() {
-        return runOnce(() -> intakeMotor.set(-0.5)).andThen(() -> hasNote = false, this);
+        return runOnce(() -> intakeMotor.set(-0.5)).andThen(() -> this.hasNote = false, this);
     }
 
     /** @return Command that starts outtaking */
