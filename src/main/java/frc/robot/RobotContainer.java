@@ -55,7 +55,7 @@ public class RobotContainer {
     /** The shooter on the robot */
     private final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
     private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
-    private final TrapDoorSubsystem trapDoorSubsystem = new TrapDoorSubsystem();
+//    private final TrapDoorSubsystem trapDoorSubsystem = new TrapDoorSubsystem();
     // private final BlinkinSubsystem blinkinSubsystem = new BlinkinSubsystem();
 
     public RobotContainer(TimedRobot robot, boolean usingXBox) {
@@ -75,17 +75,33 @@ public class RobotContainer {
     private void configureLogitechBindings() {
         if (driverLogitechController == null) return;
 
+        // LJ - Updown = Forward/Reverse (DRIVE)
+        // RJ - Left/Right = Strafe (DRIVE)
         swerveDriveSubsystem.setDefaultCommand(swerveDriveSubsystem.driveCommand(
                 driverLogitechController.getLeftYAxis(), driverLogitechController.getLeftXAxis(),
                 driverLogitechController.getRightXAxis(), false));
 
+        // DPAD = 90 degree snap
 //        driverLogitechController.getDPadLeft().onTrue(swerveDriveSubsystem.snap90LeftCommand());
 //        driverLogitechController.getDPadRight().onTrue(swerveDriveSubsystem.snap90RightCommand());
 
-//        driverLogitechController.getLeftTrigger().whileTrue(swerveDriveSubsystem.enableSlowMode()).onFalse(swerveDriveSubsystem.disableSlowMode());
+        // LJ Push - (Toggle) = Slowmode
+//        driverLogitechController.getLeftJoystick().whileTrue(swerveDriveSubsystem.enableSlowMode()).onFalse(swerveDriveSubsystem.disableSlowMode());
 
-        driverLogitechController.getDPadLeft().onTrue(shooterSubsystem.setAppliedVoltage(0.02));
-        driverLogitechController.getDPadRight().onTrue(shooterSubsystem.setAppliedVoltage(-0.02));
+        // = Intake
+        driverLogitechController.getX().whileTrue(intakeSubsystem.intakeCommand()).onFalse(intakeSubsystem.stopMotorCommand());
+        driverLogitechController.getY().whileTrue(intakeSubsystem.outtakeCommand()).onFalse(intakeSubsystem.stopMotorCommand());
+
+        // Intake Rotation (Manual)
+        driverLogitechController.getLeftBumper().whileTrue(intakeSubsystem.raiseIntakeCommand()).onFalse(intakeSubsystem.stopRotatingIntake());
+        driverLogitechController.getRightBumper().whileTrue(intakeSubsystem.lowerIntakeCommand()).onFalse(intakeSubsystem.stopRotatingIntake());
+
+        // Intake Rotation (PID)
+//        driverLogitechController.getLeftBumper().whileTrue(intakeSubsystem.raiseIntakeCommandPID());
+//        driverLogitechController.getRightBumper().whileTrue(intakeSubsystem.lowerIntakeCommandPID());
+
+        driverLogitechController.getDPadRight().onTrue(shooterSubsystem.setAppliedVoltage(0.02));
+        driverLogitechController.getDPadLeft().onTrue(shooterSubsystem.setAppliedVoltage(-0.02));
                 
         // driverControllerLogitech.getA().onTrue(swerveDriveSubsystem.rotateCenterApriltagCommand(() -> 0.2, limelightSubsystem.getAprilTagXOffset()));
         // operatorControllerLogitech.getA().onTrue(shooterSubsystem.shootManuallyWithTimeout(-1));
@@ -99,10 +115,6 @@ public class RobotContainer {
 
         driverLogitechController.getA().whileTrue(shooterSubsystem.shootAtVoltageCommand()).onFalse(shooterSubsystem.stopShootingCommand());
     
-        driverLogitechController.getX().whileTrue(intakeSubsystem.intakeCommand()).onFalse(intakeSubsystem.stopMotorCommand());
-        driverLogitechController.getY().whileTrue(intakeSubsystem.outtakeCommand()).onFalse(intakeSubsystem.stopMotorCommand());
-        driverLogitechController.getLeftBumper().whileTrue(intakeSubsystem.raiseIntakeCommand()).onFalse(intakeSubsystem.stopRotatingIntake());
-        driverLogitechController.getRightBumper().whileTrue(intakeSubsystem.lowerIntakeCommand()).onFalse(intakeSubsystem.stopRotatingIntake());     // driverLogitechController.getB().whileTrue(shooterSubsystem.shootAtVoltageCommand(-0.5)).onFalse(shooterSubsystem.stopShootingCommand());
         // driverLogitechController.getX().whileTrue(shooterSubsystem.shootAtVoltageCommand(0.7)).onFalse(shooterSubsystem.stopShootingCommand());
         // driverLogitechController.getY().whileTrue(shooterSubsystem.shootAtVoltageCommand(-0.7)).onFalse(shooterSubsystem.stopShootingCommand());
 

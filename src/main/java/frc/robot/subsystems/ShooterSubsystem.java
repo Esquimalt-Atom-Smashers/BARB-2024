@@ -38,14 +38,10 @@ public class ShooterSubsystem extends SubsystemBase {
         configureMotors();
     }
 
-    @Override
-    public void periodic(){
-        System.out.println(this.appliedVoltage);
-    }
-
     public Command setAppliedVoltage(double voltage) {
         return runOnce(() -> {
             this.appliedVoltage += voltage;
+            System.out.println(appliedVoltage);
         });
     }
     /**

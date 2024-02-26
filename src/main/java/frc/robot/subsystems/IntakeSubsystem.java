@@ -54,12 +54,9 @@ public final class IntakeSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-//        System.out.println("Intake Motor Output Current: " + intakeMotor.getOutputCurrent());
-//        System.out.println("Hasnote: " + hasNote);
         if (intakeMotor.getOutputCurrent() > 25) {
             this.hasNote = true;
         }
-        System.out.println(this.hasNote);
         SmartDashboard.putBoolean(" Note in Intake", this.hasNote);
     }
 
@@ -129,41 +126,50 @@ public final class IntakeSubsystem extends SubsystemBase {
 
     /** Rotates the intake until it is in index position */
     public Command raiseIntakeCommand() {
-        // return run(() -> {
-        //     isUp = true;
-        //     rotateIntake(IntakeConstants.INTAKE_TO_INDEX_RPM);
-        // }).until(this::atIndexPosition).andThen(this::stopRotation);
-        return runOnce(() -> rotationMotor.set(-0.1));
+        return runOnce(() -> rotationMotor.set(0.1));
     }
 
     /** Rotates the intake until it is in intake position */
     public Command lowerIntakeCommand() {
-        // return run(() -> {
-        //     isUp = false;
-        //     rotateIntake(IntakeConstants.INTAKE_TO_INTAKE_RPM);
+        return runOnce(() -> rotationMotor.set(-0.1));
+    }
 
-        // }).until(this::atIntakePosition).andThen(this::stopRotation);
-        return runOnce(() -> rotationMotor.set(0.1));
-    }    
+    public Command raiseIntakeCommandPID() {
+//         return run(() -> {
+//             isUp = true;
+//             rotateIntake(IntakeConstants.INTAKE_TO_INDEX_RPM);
+//         }).until(this::atIndexPosition).andThen(this::stopRotation);
+        return run(() -> {});
+    }
+
+    /** Rotates the intake until it is in intake position */
+    public Command lowerIntakeCommandPID() {
+//         return run(() -> {
+//             isUp = false;
+//             rotateIntake(IntakeConstants.INTAKE_TO_INTAKE_RPM);
+//
+//         }).until(this::atIntakePosition).andThen(this::stopRotation);
+        return run(() -> {});
+    }
 
     public Command stopRotatingIntake() {
         return runOnce(() -> rotationMotor.set(0));
     }
 
     /**
-     * Rotate the intake at a specified velocity. 
+     * Rotate the intake to a specified position.
      * 
-     * @param rpm The velocity to rotate at (in rpm)
+     * @param position The position to rotate to.
      */
-    private void rotateIntake(double rpm) {
-        rpm = Math.min(rpm, IntakeConstants.ROTATION_MAX_RPM);
-        rotationController.setReference(rpm, ControlType.kVelocity);
+    private void rotateIntake(double position) {
+        position = Math.min(position, IntakeConstants.ROTATION_MAX_RPM);
+        rotationController.setReference(position, ControlType.kPosition);
     }
 
     /**
      * Intake at a specified velocity. 
      * 
-     * @param rpm The velocity to intake at (in rpm)
+     * @param rpm The velocity to rotate at (in rpm)
      */
     private void intake(double rpm) {
         intakeController.setReference(MathUtil.clamp(rpm, rpm, IntakeConstants.INTAKE_MAX_RPM), ControlType.kVelocity);
@@ -172,7 +178,7 @@ public final class IntakeSubsystem extends SubsystemBase {
     /**
      * Outtake at a specified velocity. 
      * 
-     * @param rpm The velocity to outtake at (in rpm)
+     * @param rpm The velocity to rotate at (in rpm)
      */
     private void outtake(double rpm) {
         intakeController.setReference(-MathUtil.clamp(rpm, rpm, IntakeConstants.OUTTAKE_MAX_RPM) , ControlType.kVelocity);
