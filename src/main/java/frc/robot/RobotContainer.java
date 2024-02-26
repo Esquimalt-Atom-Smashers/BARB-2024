@@ -79,7 +79,7 @@ public class RobotContainer {
         // RJ - Left/Right = Strafe (DRIVE)
         swerveDriveSubsystem.setDefaultCommand(swerveDriveSubsystem.driveCommand(
                 driverLogitechController.getLeftYAxis(), driverLogitechController.getLeftXAxis(),
-                driverLogitechController.getRightXAxis(), false));
+                driverLogitechController.getRightXAxis(), true));
 
         // DPAD = 90 degree snap
 //        driverLogitechController.getDPadLeft().onTrue(swerveDriveSubsystem.snap90LeftCommand());
