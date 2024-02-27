@@ -214,8 +214,8 @@ public final class Constants {
         public static final int INTAKE_MOTOR_PORT = 3;
         public static final int ROTATION_MOTOR_PORT = 4;
 
-        public static final int INTAKE_LIMIT_SWITCH_PORT = -1;
-        public static final int INDEX_LIMIT_SWITCH_PORT = -1;
+        public static final int LOWER_LIMIT_SWITCH_PORT = 0;
+        public static final int UPPER_LIMIT_SWITCH_PORT = 1;
 
         /** Hardware behaviour constants */
         public static final IdleMode INTAKE_IDLE_MODE = IdleMode.kBrake;

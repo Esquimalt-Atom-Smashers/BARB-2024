@@ -1,5 +1,7 @@
 package frc.robot.subsystems;
 
+import static edu.wpi.first.wpilibj2.command.Commands.waitUntil;
+
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkBase.ControlType;
@@ -30,8 +32,8 @@ public final class IntakeSubsystem extends SubsystemBase {
     private final SparkPIDController intakeController;
     private final SparkPIDController rotationController;
 
-    // private final DigitalInput intakePositionLimit;
-    // private final DigitalInput indexPositionLimit;
+    private final DigitalInput lowerPositionLimit;
+    private final DigitalInput upperPositionLimit;
 
     private boolean isUp = true;
 
@@ -48,8 +50,8 @@ public final class IntakeSubsystem extends SubsystemBase {
         intakeController = intakeMotor.getPIDController();
         configureIntakeMotor();
 
-        // intakePositionLimit = new DigitalInput(IntakeConstants.INTAKE_LIMIT_SWITCH_PORT);
-        // indexPositionLimit = new DigitalInput(IntakeConstants.INDEX_LIMIT_SWITCH_PORT);
+        lowerPositionLimit = new DigitalInput(IntakeConstants.LOWER_LIMIT_SWITCH_PORT);
+        upperPositionLimit = new DigitalInput(IntakeConstants.UPPER_LIMIT_SWITCH_PORT);
     }
 
     @Override
@@ -58,6 +60,9 @@ public final class IntakeSubsystem extends SubsystemBase {
             this.hasNote = true;
         }
         SmartDashboard.putBoolean(" Note in Intake", this.hasNote);
+        System.out.println("Is lower pressed?: " + isAtLowerPosition());
+        System.out.println("Is upper pressed?: " + isAtUpperPosition());
+        
     }
 
     /**
@@ -126,12 +131,12 @@ public final class IntakeSubsystem extends SubsystemBase {
 
     /** Rotates the intake until it is in index position */
     public Command raiseIntakeCommand() {
-        return runOnce(() -> rotationMotor.set(0.1));
+        return runOnce(() -> rotationMotor.set(0.1)).andThen(new WaitUntilCommand(() -> isAtUpperPosition()), stopRotatingIntake());
     }
 
     /** Rotates the intake until it is in intake position */
     public Command lowerIntakeCommand() {
-        return runOnce(() -> rotationMotor.set(-0.1));
+        return runOnce(() -> rotationMotor.set(-0.1)).andThen(new WaitUntilCommand(() -> isAtLowerPosition()), stopRotatingIntake());
     }
 
     public Command raiseIntakeCommandPID() {
@@ -195,14 +200,14 @@ public final class IntakeSubsystem extends SubsystemBase {
     }
     
     /** @reutrn True if the lower limit switch is being pressed */
-    // private boolean atIntakePosition() {
-    //     return intakePositionLimit.get();
-    // }
+    private boolean isAtLowerPosition() {
+        return lowerPositionLimit.get();
+    }
 
     // /** @reutrn True if the upper limit switch is being pressed */
-    // private boolean atIndexPosition() {
-    //     return indexPositionLimit.get();
-    // }
+    private boolean isAtUpperPosition() {
+        return upperPositionLimit.get();
+    }
 
     /** @return True is the intake is up or moving to up, false otherwise */
     public boolean isUp() {
