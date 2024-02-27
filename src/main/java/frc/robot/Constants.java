@@ -225,7 +225,7 @@ public final class Constants {
         public static final double ROTATION_VOLTAGE_COMPENSATION = 12.2;
 
         public static final boolean INTAKE_MOTOR_INVERTED = false;
-        public static final boolean ROTATION_MOTOR_INVERTED = false;
+        public static final boolean ROTATION_MOTOR_INVERTED = true;
 
         /** PID Controller constants */ //TODO: determine values
         public static final double INTAKE_CONTROLLER_KP = 6e-5; 

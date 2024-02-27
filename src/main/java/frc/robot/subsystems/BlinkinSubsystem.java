@@ -1,7 +1,9 @@
 package frc.robot.subsystems;
 
+import com.ctre.phoenix.led.CANdle;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.networktables.NetworkTableInstance;
+import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.motorcontrol.Spark;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -11,27 +13,31 @@ public class BlinkinSubsystem extends SubsystemBase {
      * The port the blinkin is plugged into. We use the Spark class because the
      * range of pwm values are the same.
      */
-    private final Spark blinkin = new Spark(-1);
+    private final Spark blinkin = new Spark(0);
 
     public BlinkinSubsystem() {
-        this.updateAllianceColour();
+//        this.updateAllianceColour();
+        blinkin.set(BlinkinValue.SOLID_PINK.pwm);
     }
 
+    public Command setColor(BlinkinValue value) {
+        return runOnce(() -> blinkin.set(value.pwm));
+    }
     /** Command which updates the LEDs to corrospond to the alliance we on. */
-    public Command updateAllianceColour() {
-        return runOnce(() -> {
-            boolean isBlueAlliance = NetworkTableInstance.getDefault().getTable("FMSInfo").getEntry("IsBlueAlliance")
-                    .getBoolean(true);
-
-            blinkin.set(isBlueAlliance ? BlinkinValue.SOLID_BLUE.pwm : BlinkinValue.SOLID_RED.pwm);
-        });
-    }
-
-    public Command updateColour(BlinkinValue value) {
-        return runOnce(() -> {
-            blinkin.set(value.pwm);
-        });
-    }
+//    public Command updateAllianceColour() {
+//        return runOnce(() -> {
+//            boolean isBlueAlliance = NetworkTableInstance.getDefault().getTable("FMSInfo").getEntry("IsBlueAlliance")
+//                    .getBoolean(true);
+//
+//            blinkin.set(isBlueAlliance ? BlinkinValue.SOLID_BLUE.pwm : BlinkinValue.SOLID_RED.pwm);
+//        });
+//    }
+//
+//    public Command updateColour(BlinkinValue value) {
+//        return runOnce(() -> {
+//            blinkin.set(value.pwm);
+//        });
+//    }
 
     /**
      * Enum for all the colour values. Retrieved from:

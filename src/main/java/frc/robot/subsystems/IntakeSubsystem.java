@@ -56,7 +56,7 @@ public final class IntakeSubsystem extends SubsystemBase {
 
     @Override
     public void periodic() {
-        if (intakeMotor.getOutputCurrent() > 25) {
+        if (intakeMotor.getOutputCurrent() > 20) {
             this.hasNote = true;
         }
         SmartDashboard.putBoolean(" Note in Intake", this.hasNote);
@@ -131,12 +131,22 @@ public final class IntakeSubsystem extends SubsystemBase {
 
     /** Rotates the intake until it is in index position */
     public Command raiseIntakeCommand() {
-        return runOnce(() -> rotationMotor.set(0.1)).andThen(new WaitUntilCommand(() -> isAtUpperPosition()), stopRotatingIntake());
+        return new ConditionalCommand(
+                stopMotorCommand(),
+                // This is technically not needed right now, because the control is a hold, but this will work for both hold and a press
+                runOnce(() -> rotationMotor.set(0.5)).andThen(new WaitUntilCommand(this::isAtUpperPosition), stopRotatingIntake()),
+                this::isAtUpperPosition
+        );
     }
 
     /** Rotates the intake until it is in intake position */
     public Command lowerIntakeCommand() {
-        return runOnce(() -> rotationMotor.set(-0.1)).andThen(new WaitUntilCommand(() -> isAtLowerPosition()), stopRotatingIntake());
+        return new ConditionalCommand(
+                stopMotorCommand(),
+                // This is technically not needed right now, because the control is a hold, but this will work for both hold and a press
+                runOnce(() -> rotationMotor.set(-0.5)).andThen(new WaitUntilCommand(this::isAtLowerPosition), stopRotatingIntake()),
+                this::isAtLowerPosition
+        );
     }
 
     public Command raiseIntakeCommandPID() {
@@ -201,10 +211,10 @@ public final class IntakeSubsystem extends SubsystemBase {
     
     /** @reutrn True if the lower limit switch is being pressed */
     private boolean isAtLowerPosition() {
-        return lowerPositionLimit.get();
+        return !lowerPositionLimit.get();
     }
 
-    // /** @reutrn True if the upper limit switch is being pressed */
+     /** @return True if the upper limit switch is being pressed */
     private boolean isAtUpperPosition() {
         return upperPositionLimit.get();
     }
