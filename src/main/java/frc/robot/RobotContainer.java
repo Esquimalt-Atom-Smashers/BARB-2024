@@ -92,8 +92,11 @@ public class RobotContainer {
         driverLogitechController.getDPadDown().onTrue(blinkinSubsystem.setColor(BlinkinValue.CONFETTI));
 
         // = Intake
-        driverLogitechController.getX().whileTrue(intakeSubsystem.intakeCommand()).onFalse(intakeSubsystem.stopMotorCommand());
-        driverLogitechController.getY().whileTrue(intakeSubsystem.outtakeCommand()).onFalse(intakeSubsystem.stopMotorCommand());
+//        driverLogitechController.getX().whileTrue(intakeSubsystem.intakeCommand()).onFalse(intakeSubsystem.stopMotorCommand());
+//        driverLogitechController.getY().whileTrue(intakeSubsystem.outtakeCommand()).onFalse(intakeSubsystem.stopMotorCommand());
+
+        driverLogitechController.getX().onTrue(intakeSubsystem.goToIntakeHome());
+        driverLogitechController.getY().onTrue(intakeSubsystem.goToIntakePosition());
 
         // Intake Rotation (Manual)
         driverLogitechController.getLeftBumper().whileTrue(intakeSubsystem.lowerIntakeCommand()).onFalse(intakeSubsystem.stopRotatingIntake());
@@ -102,6 +105,8 @@ public class RobotContainer {
         // Intake Rotation (PID)
 //        driverLogitechController.getLeftBumper().whileTrue(intakeSubsystem.raiseIntakeCommandPID());
 //        driverLogitechController.getRightBumper().whileTrue(intakeSubsystem.lowerIntakeCommandPID());
+
+
 
         driverLogitechController.getDPadRight().onTrue(shooterSubsystem.setAppliedVoltage(0.02));
         driverLogitechController.getDPadLeft().onTrue(shooterSubsystem.setAppliedVoltage(-0.02));

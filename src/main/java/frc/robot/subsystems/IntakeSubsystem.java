@@ -60,8 +60,9 @@ public final class IntakeSubsystem extends SubsystemBase {
             this.hasNote = true;
         }
         SmartDashboard.putBoolean(" Note in Intake", this.hasNote);
-        System.out.println("Is lower pressed?: " + isAtLowerPosition());
-        System.out.println("Is upper pressed?: " + isAtUpperPosition());
+        SmartDashboard.putNumber("Intake Position", this.rotationMotor.getEncoder().getPosition());
+//        System.out.println("Is lower pressed?: " + isAtLowerPosition());
+//        System.out.println("Is upper pressed?: " + isAtUpperPosition());
         
     }
 
@@ -92,7 +93,7 @@ public final class IntakeSubsystem extends SubsystemBase {
         rotationMotor.setInverted(IntakeConstants.ROTATION_MOTOR_INVERTED);
         rotationMotor.burnFlash();
 
-        rotationController.setP(IntakeConstants.ROTATION_CONTROLLER_KP);
+        rotationController.setP(0.03);
         rotationController.setI(IntakeConstants.ROTATION_CONTROLLER_KI);
         rotationController.setD(IntakeConstants.ROTATION_CONTROLLER_KD);
         rotationController.setIZone(IntakeConstants.ROTATION_CONTROLLER_IZ);
@@ -104,6 +105,13 @@ public final class IntakeSubsystem extends SubsystemBase {
     public Command intakeCommand() {
         return new ParallelDeadlineGroup(new WaitUntilCommand(() -> hasNote), new InstantCommand(() -> intakeMotor.set(0.5))).andThen(stopMotorCommand());
         // return runOnce(() -> intakeMotor.set(hasNote ? 0 : 0.5));
+    }
+    public Command goToIntakePosition() {
+        return runOnce(() -> rotationController.setReference(10, ControlType.kPosition));
+    }
+
+    public Command goToIntakeHome() {
+        return runOnce(() -> rotationController.setReference(0, ControlType.kPosition));
     }
 
     public Command outtakeCommand() {
