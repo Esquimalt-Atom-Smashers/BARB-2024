@@ -21,7 +21,7 @@ public class ShooterSubsystem extends SubsystemBase {
     private final SparkPIDController leftPIDController;
     private final SparkPIDController rightPIDController;
     
-    public double appliedVoltage = 0.30;
+    public double appliedVoltage = 0.70;
     /**
      * Constructs a ShooterSubsystem object.
      * Initializes the two motors and their PID controllers, which

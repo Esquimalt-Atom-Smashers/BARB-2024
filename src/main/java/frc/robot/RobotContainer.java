@@ -37,10 +37,10 @@ import frc.robot.subsystems.BlinkinSubsystem.BlinkinValue;
  * subsystems, commands, and trigger mappings) should be declared here.
  */
 public class RobotContainer {
-    private final boolean usingXBox;
     private LogitechController driverLogitechController;
-    private XboxController driverXBoxController;
-    private XboxController operatorXBoxController;
+
+    // public AutonomousController autonomousController;
+
     // private final LogitechController operatorControllerLogitech = new LogitechController(1);
 
     // private final LogitechController operatorController = new
@@ -51,71 +51,81 @@ public class RobotContainer {
 
     /** The swerve drive base of the robot */
     private final SwerveDriveSubsystem swerveDriveSubsystem = new SwerveDriveSubsystem();
-    private final LimelightSubsystem limelightSubsystem = new LimelightSubsystem();
+    // private final LimelightSubsystem limelightSubsystem = new LimelightSubsystem();
     /** The shooter on the robot */
-    private final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
-    private final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
-//    private final TrapDoorSubsystem trapDoorSubsystem = new TrapDoorSubsystem();
-     private final BlinkinSubsystem blinkinSubsystem = new BlinkinSubsystem();
+    public final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
+    public final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
+    // private final TrapDoorSubsystem trapDoorSubsystem = new TrapDoorSubsystem();
+    private final BlinkinSubsystem blinkinSubsystem = new BlinkinSubsystem();
 
-    public RobotContainer(TimedRobot robot, boolean usingXBox) {
-        this.usingXBox = usingXBox;
-        if (usingXBox) {
-            driverXBoxController = new XboxController(0);
-            operatorXBoxController = new XboxController(1);
-            configureXBoxBindings();
-        }
-        else {
-            driverLogitechController = new LogitechController(0);
-            configureLogitechBindings();
-        }
+    public RobotContainer(TimedRobot robot) {
+        driverLogitechController = new LogitechController(0);
+        configureLogitechBindings();
     }
     
     /** Configure the controls for the logitech controller */
     private void configureLogitechBindings() {
-        if (driverLogitechController == null) return;
-
+        // if (driverLogitechController == null) return;
+        
         // LJ - Updown = Forward/Reverse (DRIVE)
         // RJ - Left/Right = Strafe (DRIVE)
+        driverLogitechController.getRightXAxis().setInverted(true);
+
         swerveDriveSubsystem.setDefaultCommand(swerveDriveSubsystem.driveCommand(
-                driverLogitechController.getLeftYAxis(), driverLogitechController.getLeftXAxis(),
-                driverLogitechController.getRightXAxis(), true));
+            () -> getDriveForwardAxis(), () -> getDriveStrafeAxis(),
+            () -> getDriveRotationAxis(), true));
+            
+        driverLogitechController.getBack().onTrue(swerveDriveSubsystem.resetGyro());
+            // DPAD = 90 degree snap
+            //        driverLogitechController.getDPadLeft().onTrue(swerveDriveSubsystem.snap90LeftCommand());
+            //        driverLogitechController.getDPadRight().onTrue(swerveDriveSubsystem.snap90RightCommand());
+            
+            // LJ Push - (Toggle) = Slowmode
+            //        driverLogitechController.getLeftJoystick().whileTrue(swerveDriveSubsystem.enableSlowMode()).onFalse(swerveDriveSubsystem.disableSlowMode());
+            
+            // driverLogitechController.getDPadUp().onTrue(blinkinSubsystem.setColor(BlinkinValue.SOLID_PINK));
+            // driverLogitechController.getDPadDown().onTrue(blinkinSubsystem.setColor(BlinkinValue.CONFETTI));
+            
+            // = Intake
+            //        driverLogitechController.getX().whileTrue(intakeSubsystem.intakeCommand()).onFalse(intakeSubsystem.stopMotorCommand());
+            //        driverLogitechController.getY().whileTrue(intakeSubsystem.outtakeCommand()).onFalse(intakeSubsystem.stopMotorCommand());
 
-        // DPAD = 90 degree snap
-//        driverLogitechController.getDPadLeft().onTrue(swerveDriveSubsystem.snap90LeftCommand());
-//        driverLogitechController.getDPadRight().onTrue(swerveDriveSubsystem.snap90RightCommand());
-
-        // LJ Push - (Toggle) = Slowmode
-//        driverLogitechController.getLeftJoystick().whileTrue(swerveDriveSubsystem.enableSlowMode()).onFalse(swerveDriveSubsystem.disableSlowMode());
-
-        driverLogitechController.getDPadUp().onTrue(blinkinSubsystem.setColor(BlinkinValue.SOLID_PINK));
-        driverLogitechController.getDPadDown().onTrue(blinkinSubsystem.setColor(BlinkinValue.CONFETTI));
-
-        // = Intake
-//        driverLogitechController.getX().whileTrue(intakeSubsystem.intakeCommand()).onFalse(intakeSubsystem.stopMotorCommand());
-//        driverLogitechController.getY().whileTrue(intakeSubsystem.outtakeCommand()).onFalse(intakeSubsystem.stopMotorCommand());
-
-        driverLogitechController.getX().onTrue(intakeSubsystem.goToIntakeHome());
-        driverLogitechController.getY().onTrue(intakeSubsystem.goToIntakePosition());
-
-        // Intake Rotation (Manual)
-        driverLogitechController.getLeftBumper().whileTrue(intakeSubsystem.lowerIntakeCommand()).onFalse(intakeSubsystem.stopRotatingIntake());
-        driverLogitechController.getRightBumper().whileTrue(intakeSubsystem.raiseIntakeCommand()).onFalse(intakeSubsystem.stopRotatingIntake());
-
-        // Intake Rotation (PID)
-//        driverLogitechController.getLeftBumper().whileTrue(intakeSubsystem.raiseIntakeCommandPID());
-//        driverLogitechController.getRightBumper().whileTrue(intakeSubsystem.lowerIntakeCommandPID());
-
-
-
-        driverLogitechController.getDPadRight().onTrue(shooterSubsystem.setAppliedVoltage(0.02));
-        driverLogitechController.getDPadLeft().onTrue(shooterSubsystem.setAppliedVoltage(-0.02));
+            // driverLogitechController.getDPadUp().onTrue(trapDoorSubsystem.extendCommand());
+            // driverLogitechController.getDPadDown().onTrue(trapDoorSubsystem.retractCommand());
+            
+            // Only be able to control the intake if it starts in the upper position
+            // UNCOMMENT
+            if (intakeSubsystem.isAtUpperPosition()) {
+                SmartDashboard.putString("Intake Limit Switch", "Initialized");
+                driverLogitechController.getX().onTrue(intakeSubsystem.goToIntakeHome());
+                driverLogitechController.getY().onTrue(intakeSubsystem.goToIntakePosition());
+                driverLogitechController.getB().onTrue(intakeSubsystem.goToAMPPosition());
+                driverLogitechController.getRightTrigger().whileTrue(intakeSubsystem.shootAmpCommand()).onFalse(intakeSubsystem.stopMotorCommand());
+                driverLogitechController.getRightBumper().whileTrue(intakeSubsystem.intakeCommand()).onFalse(intakeSubsystem.stopMotorCommand());
+            }
+            else {
+                SmartDashboard.putString("Intake Limit Switch", "NOT initialized. Press switch and restart code.");
+                System.out.println("!!! Intake subsystem didn't start in the correct position !!!");
+            }
+            
+            // Intake Rotation (Manual)
+            // driverLogitechController.getLeftBumper().whileTrue(intakeSubsystem.lowerIntakeCommand()).onFalse(intakeSubsystem.stopRotatingIntake());
+            // driverLogitechController.getRightBumper().whileTrue(intakeSubsystem.raiseIntakeCommand()).onFalse(intakeSubsystem.stopRotatingIntake());
+            
+            // Intake Rotation (PID)
+            //        driverLogitechController.getLeftBumper().whileTrue(intakeSubsystem.raiseIntakeCommandPID());
+            //        driverLogitechController.getRightBumper().whileTrue(intakeSubsystem.lowerIntakeCommandPID());
+            
+            
+        driverLogitechController.getLeftBumper().onTrue(swerveDriveSubsystem.autoDriveForwardCommand());
+        // driverLogitechController.getDPadRight().onTrue(shooterSubsystem.setAppliedVoltage(0.05));
+        // driverLogitechController.getDPadLeft().onTrue(shooterSubsystem.setAppliedVoltage(-0.05));
                 
         // driverControllerLogitech.getA().onTrue(swerveDriveSubsystem.rotateCenterApriltagCommand(() -> 0.2, limelightSubsystem.getAprilTagXOffset()));
         // operatorControllerLogitech.getA().onTrue(shooterSubsystem.shootManuallyWithTimeout(-1));
 
-//        driverLogitechController.getDPadUp().whileTrue(trapDoorSubsystem.extendCommand()).onFalse(trapDoorSubsystem.stopCommand());
-//        driverLogitechController.getDPadDown().whileTrue(trapDoorSubsystem.retractCommand()).onFalse(trapDoorSubsystem.stopCommand());
+    //    driverLogitechController.getDPadLeft().whileTrue(trapDoorSubsystem.extendCommand()).onFalse(trapDoorSubsystem.stopCommand());
+    //    driverLogitechController.getDPadRight().whileTrue(trapDoorSubsystem.retractCommand()).onFalse(trapDoorSubsystem.stopCommand());
         // driverLogitechController.getDPadUp().whileTrue(trapDoorSubsystem.extendCommand()).onFalse(trapDoorSubsystem.stopCommand());
         // driverLogitechController.getDPadDown().whileTrue(trapDoorSubsystem.retractCommand()).onFalse(trapDoorSubsystem.stopCommand());
         // driverLogitechController.getLeftBumper().whileTrue(shooterSubsystem.shootAtVoltageCommand(ShooterSubsystem.appliedVoltage)).onFalse(shooterSubsystem.shootAtVoltageCommand(0));
@@ -141,79 +151,22 @@ public class RobotContainer {
         // shooterSubsystem.setDefaultCommand(shooterSubsystem.getDefaultCommand());
     }
 
-    /** Configuer the controls for using the XBox controllers */
-    public void configureXBoxBindings() {
-        if (driverXBoxController == null) return;
-
-        swerveDriveSubsystem.setDefaultCommand(swerveDriveSubsystem.driveCommand(
-            this::getDriveForwardAxis, 
-            this::getDriveStrafeAxis, 
-            this::getDriveRotationAxis, 
-            // TODO: Possibly make a button to swap field centric
-            // This would require replacing the boolean in driveCommand with a BooleanSupplier
-            false)
-        );
-
-        // Currently these are pretty basic commands, to be used for testing
-        
-        // new Trigger(operatorXBoxController::getAButton).onTrue(intakeSubsystem.toggleUpAndDownCommand());
-
-        // new Trigger(operatorXBoxController::getXButton)
-        //     .onTrue(intakeSubsystem.outtakeCommand())
-        //     .onFalse(
-        //         new ConditionalCommand(intakeSubsystem.stopMotorCommand(), intakeSubsystem.intakeCommand(), intakeSubsystem::isUp)
-        // );
-
-        // new Trigger(operatorXBoxController::getBButton).onTrue(
-        //     shooterSubsystem.shootAtVoltageCommand(0.5).andThen(
-        //         intakeSubsystem.outtakeCommand(),
-        //         // Wait for the note to shoot (probably way more than enough time)
-        //         new WaitCommand(2),
-        //         shooterSubsystem.stopShootingCommand().alongWith(intakeSubsystem.stopMotorCommand())
-        //     ));
-        
-        // new Trigger(operatorXBoxController::getYButton).onTrue(
-        //     trapDoorSubsystem.extendCommand().alongWith(shooterSubsystem.shootAtVelocityCommand(0.5)).andThen(
-        //         // Wait for the pneumatics to extend
-        //         new WaitCommand(0.5),
-        //         intakeSubsystem.outtakeCommand(),
-        //         // Wait for the note to shoot (probably more than enough time)
-        //         new WaitCommand(2),
-        //         shooterSubsystem.stopShootingCommand().alongWith(intakeSubsystem.stopMotorCommand(), trapDoorSubsystem.retractCommand())
-        //     )
-        // );
-    }
 
     /** @return The axis used to drive forwards, scaled and limited by the slew rate limiter */
     public double getDriveForwardAxis() {
-        if (usingXBox)
-            return -forwardRateLimiter.calculate(
-                    square(driverXBoxController.getRawAxis(1)) * Constants.SwerveConstants.maxSpeed);
-        else
-            return -forwardRateLimiter.calculate(
-                square(deadband(driverLogitechController.getLeftYAxis().getRaw(), 0.05)) * Constants.SwerveConstants.maxSpeed);
+        return -forwardRateLimiter.calculate(
+            square(deadband(driverLogitechController.getLeftYAxis().getRaw(), 0.05)) * Constants.SwerveConstants.maxSpeed);
     }
         
     /** @return The axis used to strafe, scaled and limited by the slew rate limiter */
     public double getDriveStrafeAxis() {
-        if (usingXBox)
-            return -strafeRateLimiter.calculate(
-                square(driverXBoxController.getRawAxis(0)) * Constants.SwerveConstants.maxSpeed);
-        else 
-            return -forwardRateLimiter.calculate(
-                square(deadband(driverLogitechController.getLeftXAxis().getRaw(), 0.05)) * Constants.SwerveConstants.maxSpeed);
-            
+        return -strafeRateLimiter.calculate(
+            square(deadband(driverLogitechController.getLeftXAxis().getRaw(), 0.05)) * Constants.SwerveConstants.maxSpeed);            
     }
                 
     /** @return The axis used to turn, scaled and limited by the slew rate limiter */
     public double getDriveRotationAxis() {
-        if (usingXBox)
-            return -strafeRateLimiter.calculate(
-                square(driverXBoxController.getRawAxis(4)) * Constants.SwerveConstants.maxSpeed);
-        else 
-            return -forwardRateLimiter.calculate(
-                square(deadband(driverLogitechController.getRightXAxis().getRaw(), 0.05)) * Constants.SwerveConstants.maxAngularVelocity);
-        
+        return square(deadband(driverLogitechController.getRightXAxis().getRaw(), 0.05)) * Constants.SwerveConstants.maxAngularVelocity;
     }
 
     /**
@@ -246,4 +199,8 @@ public class RobotContainer {
     public SwerveDriveSubsystem getSwerveDriveSubsystem() {
         return swerveDriveSubsystem;
     }
+
+    // public Command getAutoCommand() {
+    //     return autonomousController.getAutonomousCommand();
+    // }
 }

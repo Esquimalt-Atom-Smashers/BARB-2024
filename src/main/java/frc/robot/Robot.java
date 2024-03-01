@@ -41,7 +41,9 @@ public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
   public static CTREConfigs ctreConfigs = new CTREConfigs();
   public SendableChooser<String> controllerType = new SendableChooser<>();
+  public SendableChooser<String> autonomousMode = new SendableChooser<>();
   public static String selectedController = "Logitech";
+  public static String selectedAutonomous = "Testing";
   private RobotContainer m_robotContainer;
 
 
@@ -52,12 +54,20 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
+    
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
-    m_robotContainer = new RobotContainer(this, false);
+    m_robotContainer = new RobotContainer(this);
+    // m_robotContainer.autonomousController.sendOption();
     controllerType.addOption("Logitech", selectedController);
     controllerType.addOption("XBox", selectedController);
     SmartDashboard.putData("Controller Type", controllerType);
+
+    // autonomousMode.addOption("Testing", selectedAutonomous);
+    // autonomousMode.addOption("Amp Side", selectedAutonomous);
+    // autonomousMode.addOption("Center", selectedAutonomous);
+    // autonomousMode.addOption("Source Side", selectedAutonomous);
+    // SmartDashboard.putData("Autonomous Mode", autonomousMode);
   }
 
   /**
@@ -78,6 +88,7 @@ public class Robot extends TimedRobot {
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
+    // System.out.println(m_robotContainer.autonomousController.getAutonomousCommand().getName());
     // turnMotor.setControl(out);
 
   }
@@ -92,12 +103,9 @@ public class Robot extends TimedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
-    AutonomousController autonomousController = new AutonomousController();
-    m_autonomousCommand = autonomousController.getAutonomousCommand();
-    System.out.println(autonomousController.getAutonomousCommand());
-    if (m_autonomousCommand != null) {
-      m_autonomousCommand.schedule();
-    }
+    // if (m_robotContainer.getAutoCommand() != null) {
+    //   m_robotContainer.getAutoCommand().schedule();
+    // }
   }
 
   /** This function is called periodically during autonomous. */

@@ -17,6 +17,7 @@ import frc.robot.Constants;
 import frc.robot.Constants.SwerveConstants;
 
 import java.util.List;
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.DoubleSupplier;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -38,7 +39,6 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
     /** Array of the swerve modules on the robot */
     private SwerveModule[] modules;
-
     private ADISGyro gyro;
 
     /** Max speed supplier. */
@@ -63,16 +63,16 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         odometry = new SwerveDriveOdometry(Constants.SwerveConstants.swerveKinematics, getGyroRotation(), getModulePositions());
 
         //Configures pathplanner
-        AutoBuilder.configureHolonomic(
-            this::getPose, 
-            this::resetPose, 
-            this::getVelocity, 
-            this::setVelocity, 
-            Constants.SwerveConstants.pathFollowerConfig, 
-            () -> false, //Change this later 
-            this);
+        // AutoBuilder.configureHolonomic(
+        //     this::getPose, 
+        //     this::resetPose, 
+        //     this::getVelocity, 
+        //     this::setVelocity, 
+        //     Constants.SwerveConstants.pathFollowerConfig, 
+        //     () -> false, //Change this later 
+        //     this);
     }
-
+    
     /**
      * Command used for driving during tele-operated mode.
      * 
@@ -115,11 +115,11 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         });
     }
 
-    public Command enableSlowMode() {
-        return runOnce(() -> {
-            setCustomMaxSpeedSupplier(() -> 1.5);
-        });
-    }
+    // public Command enableSlowMode() {
+    //     return runOnce(() -> {
+    //         setCustomMaxSpeedSupplier(() -> 1.5);
+    //     });
+    // }
 
     public Command disableSlowMode() {
         return runOnce(() -> resetMaxSpeedSupplier());
@@ -133,6 +133,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      * Command which 'should' make the robot try and rotate to center with an
      * apriltag.
      */
+    public Command resetGyro() {
+        return runOnce(() -> gyro.reset());
+    }
+
     public Command rotateCenterApriltagCommand(DoubleSupplier min_rotation, double tx) {
         double Kp = 0.1;
         return run(() -> {
@@ -165,7 +169,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
             // Create the start pose, and the end pose which is 2 meters in the positive x-direction
             Pose2d startPose = new Pose2d(currentPose.getTranslation(), new Rotation2d());
-            Pose2d endPose = new Pose2d(currentPose.getTranslation().plus(new Translation2d(2.0, 0.0)), new Rotation2d());
+            Pose2d endPose = new Pose2d(currentPose.getTranslation()/*.plus(new Translation2d(2.0, 0.0))*/, new Rotation2d(Math.toRadians(180)));
 
             // Create a list of points 
             List<Translation2d> bezierPoints = PathPlannerPath.bezierFromPoses(startPose, endPose);
@@ -180,7 +184,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
                     Units.degreesToRadians(540)
                     ), 
                 // Our desired end state is not moving and facing the same
-                new GoalEndState(0.0, currentPose.getRotation())
+                new GoalEndState(0.0, new Rotation2d(Math.toRadians(180)))
             );
 
             // Don't flip the path
@@ -302,7 +306,6 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      */
     public void update() {
         updateOdometry();
-
         updateModules(driveSignal);
         odometry.update(getGyroRotation(), getModulePositions());
 

@@ -1,51 +1,66 @@
-package frc.robot;
+// package frc.robot;
 
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
+// import com.pathplanner.lib.auto.AutoBuilder;
+// import com.pathplanner.lib.auto.NamedCommands;
+// import com.pathplanner.lib.commands.PathPlannerAuto;
 
-import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
-import edu.wpi.first.wpilibj2.command.Command;
-import static edu.wpi.first.wpilibj2.command.Commands.*;
+// import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
+// import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+// import edu.wpi.first.wpilibj2.command.Command;
+// import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
+// import edu.wpi.first.wpilibj2.command.WaitCommand;
+// import frc.robot.subsystems.ShooterSubsystem;
 
-public class AutonomousController {
+// import static edu.wpi.first.wpilibj2.command.Commands.*;
 
-    SendableChooser<Command> autoChooser;
+// public class AutonomousController {
+//     private RobotContainer robotContainer;
 
-    public AutonomousController() {
-        NamedCommands.registerCommand("AutoShoot", getAutoShoot());
-        NamedCommands.registerCommand("AutoRaiseIntake", getAutoRaiseIntake());
-        NamedCommands.registerCommand("AutoLowerIntake", getAutoLowerIntake());
+//     SendableChooser<Command> autoChooser;
+//     public PathPlannerAuto center;
 
-        autoChooser = AutoBuilder.buildAutoChooser();
-        SmartDashboard.putData("Auto Mode", autoChooser);
-    }
+//     public AutonomousController(RobotContainer robotContainer) {
+//         this.robotContainer = robotContainer;
+//         NamedCommands.registerCommand("AutoShoot", getAutoShoot());
+//         NamedCommands.registerCommand("AutoRaiseIntake", getAutoRaiseIntake());
+//         NamedCommands.registerCommand("AutoLowerIntake", getAutoLowerIntake());
 
-    private Command getAutoShoot() {
-        return print("No content");
+//         autoChooser = AutoBuilder.buildAutoChooser();
 
-        // return runOnce(() -> {
-            
-        // });
-    }
+//         center = new PathPlannerAuto("Center");
+//         autoChooser.setDefaultOption("Center", center);
+//     }
 
-    private Command getAutoLowerIntake() {
-        return print("No content");
+//     private Command getAutoShoot() {
+//         return sequence(
+//             robotContainer.shooterSubsystem.shootAtVoltageCommand(),
+//             new WaitCommand(5),
+//             robotContainer.intakeSubsystem.outtakeCommand(),
+//             new WaitCommand(0.5),
+//             robotContainer.shooterSubsystem.stopShootingCommand(),
+//             robotContainer.intakeSubsystem.stopMotorCommand()
+//         );
+//     }
 
-        // return runOnce(() -> {
+//     private Command getAutoLowerIntake() {
+//         return sequence(
+//             robotContainer.intakeSubsystem.goToIntakePosition(),
+//             robotContainer.intakeSubsystem.intakeCommand()
+//         );
+//     }
 
-        // });
-    }
+//     private Command getAutoRaiseIntake() {
+//         return sequence(
+//             robotContainer.intakeSubsystem.stopMotorCommand(),
+//             robotContainer.intakeSubsystem.goToIntakeHome()
+//         );
+//     }
 
-    private Command getAutoRaiseIntake() {
-        return print("No content");
+//     public Command getAutonomousCommand() {
+//         return autoChooser.getSelected();
+//     }
 
-        // return runOnce(() -> {
-
-        // });
-    }
-
-    public Command getAutonomousCommand() {
-        return autoChooser.getSelected();
-    }
-}
+//     public void sendOption() {
+//         SmartDashboard.putData("Auto Mode", autoChooser);
+//     }
+// }

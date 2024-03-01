@@ -2,6 +2,10 @@ package frc.robot.subsystems;
 
 import static edu.wpi.first.wpilibj2.command.Commands.waitUntil;
 
+import java.util.concurrent.BlockingDeque;
+
+import org.opencv.features2d.FastFeatureDetector;
+
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkBase.ControlType;
@@ -9,16 +13,19 @@ import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants;
 import frc.robot.Constants.IntakeConstants;
+import frc.robot.subsystems.BlinkinSubsystem.BlinkinValue;
 
 /**
  * A subsystem that represents the intake motor, rotation motor, their PID controllers, and the two limit switches on the intake.
@@ -36,6 +43,7 @@ public final class IntakeSubsystem extends SubsystemBase {
     private final DigitalInput upperPositionLimit;
 
     private boolean isUp = true;
+    private int currentTimer = 0;
 
     /**
      * Constructs an IntakeSubsystem object. 
@@ -57,13 +65,20 @@ public final class IntakeSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         if (intakeMotor.getOutputCurrent() > 20) {
-            this.hasNote = true;
+            currentTimer++;
+            if (currentTimer > 5) { this.hasNote = true; }
+        } else { currentTimer = 0; }
+
+        if (hasNote){
+            BlinkinSubsystem.setColor(BlinkinValue.PINK_STROBE);
+        } else {
+            BlinkinSubsystem.setColor(BlinkinValue.SOLID_PINK);
         }
+        
         SmartDashboard.putBoolean(" Note in Intake", this.hasNote);
         SmartDashboard.putNumber("Intake Position", this.rotationMotor.getEncoder().getPosition());
 //        System.out.println("Is lower pressed?: " + isAtLowerPosition());
 //        System.out.println("Is upper pressed?: " + isAtUpperPosition());
-        
     }
 
     /**
@@ -84,7 +99,7 @@ public final class IntakeSubsystem extends SubsystemBase {
         // intakeController.setOutputRange(-1, 1);
     }
 
-    /**
+    /**\
      * Configures the rotation motor and its PID controller. 
      */
     private void configureRotationMotor() {
@@ -93,21 +108,25 @@ public final class IntakeSubsystem extends SubsystemBase {
         rotationMotor.setInverted(IntakeConstants.ROTATION_MOTOR_INVERTED);
         rotationMotor.burnFlash();
 
-        rotationController.setP(0.03);
+        rotationController.setP(0.04);
         rotationController.setI(IntakeConstants.ROTATION_CONTROLLER_KI);
         rotationController.setD(IntakeConstants.ROTATION_CONTROLLER_KD);
         rotationController.setIZone(IntakeConstants.ROTATION_CONTROLLER_IZ);
         rotationController.setFF(IntakeConstants.ROTATION_CONTROLLER_FF);
-        rotationController.setOutputRange(-1, 1);
+        rotationController.setOutputRange(-0.5, 0.5);
     }
 
     /** @return Command that starts intaking */
     public Command intakeCommand() {
-        return new ParallelDeadlineGroup(new WaitUntilCommand(() -> hasNote), new InstantCommand(() -> intakeMotor.set(0.5))).andThen(stopMotorCommand());
+        return new ParallelDeadlineGroup(new WaitUntilCommand(() -> hasNote), new InstantCommand(() -> intakeMotor.set(0.70))).andThen(stopMotorCommand());
         // return runOnce(() -> intakeMotor.set(hasNote ? 0 : 0.5));
     }
     public Command goToIntakePosition() {
-        return runOnce(() -> rotationController.setReference(10, ControlType.kPosition));
+        return runOnce(() -> rotationController.setReference(-73, ControlType.kPosition));
+    }
+
+    public Command goToAMPPosition() {
+        return runOnce(() -> rotationController.setReference(-33, ControlType.kPosition));
     }
 
     public Command goToIntakeHome() {
@@ -115,8 +134,16 @@ public final class IntakeSubsystem extends SubsystemBase {
     }
 
     public Command outtakeCommand() {
-        return runOnce(() -> intakeMotor.set(-0.5)).andThen(() -> this.hasNote = false, this);
+        return runOnce(() -> intakeMotor.set(-1));
     }
+
+    public Command shootAmpCommand() {
+        return runOnce(() -> {
+            intakeMotor.set(-1);
+            this.hasNote = false;
+        });
+    }
+
 
     /** @return Command that starts outtaking */
     // public Command outtakeCommand() {
@@ -218,12 +245,12 @@ public final class IntakeSubsystem extends SubsystemBase {
     }
     
     /** @reutrn True if the lower limit switch is being pressed */
-    private boolean isAtLowerPosition() {
+    public boolean isAtLowerPosition() {
         return !lowerPositionLimit.get();
     }
 
      /** @return True if the upper limit switch is being pressed */
-    private boolean isAtUpperPosition() {
+    public boolean isAtUpperPosition() {
         return upperPositionLimit.get();
     }
 

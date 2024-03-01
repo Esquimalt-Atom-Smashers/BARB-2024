@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import java.util.Arrays;
+
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
@@ -57,7 +59,7 @@ public final class Constants {
       public static final double wheelDiameter = Units.inchesToMeters(4.0);
       public static final double wheelCircumference = wheelDiameter * Math.PI;
 
-      public static final double robotMass = Units.lbsToKilograms(45);
+      public static final double robotMass = Units.lbsToKilograms(100);
 
       public static final double openLoopRamp = 0.25; // 0.25
       public static final double closedLoopRamp = 0.0;
@@ -86,7 +88,7 @@ public final class Constants {
       public static final double drivePeakCurrentDuration = 0.1;
       public static final boolean driveEnableCurrentLimit = true;
 
-      public static double maxModuleSpeed = 1.25;
+    //   public static double maxModuleSpeed = 1.25;
 
       /* Angle Motor PID Values */
       public static final double angleKP = 45; // 43
@@ -116,14 +118,14 @@ public final class Constants {
       public static final double angleKA = (0.003 / 12);
 
       /* Swerve Profiling Values */
-      public static final double maxSpeed = 5.00; // (6.52) meters per second
-      public static final double maxAcceleration =
+      public static final double maxSpeed = 6.52; // (6.52) meters per second
+      public static final double maxAcceleration = 
               (stallTorque * driveGearRatio * 4) / (wheelDiameter * robotMass); // 16.52; // meters per second^2
-      public static final double maxAngularVelocity = 5; // rad/s
-        //       / Arrays.stream(moduleTranslations)
-        //               .map(translation -> translation.getNorm())
-        //               .max(Double::compare)
-        //               .get();
+      public static final double maxAngularVelocity = 6; // rad/s // 5
+            //    Arrays.stream(moduleTranslations)
+            //           .map(translation -> translation.getNorm())
+            //           .max(Double::compare)
+            //           .get();
 
       /* Calculated Characterization Values */
       public static final double calculatedDriveKS = 0;
@@ -152,13 +154,13 @@ public final class Constants {
       public static final SensorDirectionValue canCoderInvert = SensorDirectionValue.CounterClockwise_Positive;
 
       /* PathPlanner Configuration */
-      public static final HolonomicPathFollowerConfig pathFollowerConfig = new HolonomicPathFollowerConfig(
-      new PIDConstants(5.0, 0, 0), // Translation constants 
-      new PIDConstants(5.0, 0, 0), // Rotation constants 
-      maxModuleSpeed, 
-      moduleTranslations[0].getNorm(), // Drive base radius (distance from center to furthest module) 
-      new ReplanningConfig()
-    );
+    //   public static final HolonomicPathFollowerConfig pathFollowerConfig = new HolonomicPathFollowerConfig(
+    //   new PIDConstants(5, 0, 0), // Translation constants default = 5
+    //   new PIDConstants(7, 0, 0), // Rotation constants 
+    //   maxModuleSpeed, 
+    //   moduleTranslations[0].getNorm(), // Drive base radius (distance from center to furthest module) 
+    //   new ReplanningConfig()
+    // );
 
       /* Module Specific Constants */
       // Note, bevel gears should face left (relative to back-to-front)
