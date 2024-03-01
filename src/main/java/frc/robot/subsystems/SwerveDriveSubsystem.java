@@ -13,6 +13,7 @@ import frc.lib.gyro.ADISGyro;
 import frc.lib.gyro.NavXGyro;
 import frc.lib.swerve.SwerveDriveSignal;
 import frc.lib.swerve.SwerveModule;
+import frc.robot.AutoDriveCommand;
 import frc.robot.Constants;
 import frc.robot.Constants.SwerveConstants;
 
@@ -63,14 +64,14 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         odometry = new SwerveDriveOdometry(Constants.SwerveConstants.swerveKinematics, getGyroRotation(), getModulePositions());
 
         //Configures pathplanner
-        // AutoBuilder.configureHolonomic(
-        //     this::getPose, 
-        //     this::resetPose, 
-        //     this::getVelocity, 
-        //     this::setVelocity, 
-        //     Constants.SwerveConstants.pathFollowerConfig, 
-        //     () -> false, //Change this later 
-        //     this);
+        AutoBuilder.configureHolonomic(
+            this::getPose, 
+            this::resetPose, 
+            this::getVelocity, 
+            this::setVelocity, 
+            Constants.SwerveConstants.pathFollowerConfig, 
+            () -> false, //Change this later 
+            this);
     }
     
     /**
@@ -86,7 +87,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     public Command driveCommand(DoubleSupplier forward, DoubleSupplier strafe, DoubleSupplier rotation, boolean isFieldOriented) {
         return run(() -> {
             setVelocity(
-                    new ChassisSpeeds(forward.getAsDouble(), strafe.getAsDouble(), rotation.getAsDouble()),
+                    new ChassisSpeeds(forward.getAsDouble(), strafe.getAsDouble(), -rotation.getAsDouble()),
                     isFieldOriented);
         });
     }
@@ -115,11 +116,12 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         });
     }
 
-    // public Command enableSlowMode() {
-    //     return runOnce(() -> {
-    //         setCustomMaxSpeedSupplier(() -> 1.5);
-    //     });
-    // }
+    public Command enableSlowMode() {
+        return runOnce(() -> {
+            setCustomMaxSpeedSupplier(() -> 3);
+        });
+    }
+
 
     public Command disableSlowMode() {
         return runOnce(() -> resetMaxSpeedSupplier());
@@ -129,6 +131,9 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         this.maxSpeedSupplier = () -> SwerveConstants.maxSpeed;
     }
 
+    public DoubleSupplier getMaxSpeedSupplier() {
+        return maxSpeedSupplier;
+    }
     /**
      * Command which 'should' make the robot try and rotate to center with an
      * apriltag.
@@ -160,6 +165,11 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         });
     }
 
+    // Distance in meters
+    public Command autoDriveCommand(double x, double y) {
+        return new AutoDriveCommand(this, x, y);
+    }
+
     // This command is only used to test autonomous
     // The command drives forwards 2 meters in the x direction
     public Command autoDriveForwardCommand() {
@@ -169,7 +179,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
             // Create the start pose, and the end pose which is 2 meters in the positive x-direction
             Pose2d startPose = new Pose2d(currentPose.getTranslation(), new Rotation2d());
-            Pose2d endPose = new Pose2d(currentPose.getTranslation()/*.plus(new Translation2d(2.0, 0.0))*/, new Rotation2d(Math.toRadians(180)));
+            Pose2d endPose = new Pose2d(currentPose.getTranslation().plus(new Translation2d(2.0, 0.0)), new Rotation2d());
 
             // Create a list of points 
             List<Translation2d> bezierPoints = PathPlannerPath.bezierFromPoses(startPose, endPose);

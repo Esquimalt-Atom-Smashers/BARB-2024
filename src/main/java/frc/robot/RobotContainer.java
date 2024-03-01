@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controller.LogitechController;
@@ -132,10 +133,9 @@ public class RobotContainer {
         // driverLogitechController.getRightBumper().whileTrue(shooterSubsystem.shootAtVoltageCommand(-ShooterSubsystem.appliedVoltage)).onFalse(shooterSubsystem.shootAtVoltageCommand(0));
 
         driverLogitechController.getA().whileTrue(shooterSubsystem.shootAtVoltageCommand()).onFalse(shooterSubsystem.stopShootingCommand());
-    
+        driverLogitechController.getLeftBumper().whileTrue(swerveDriveSubsystem.enableSlowMode()).onFalse(swerveDriveSubsystem.disableSlowMode());
         // driverLogitechController.getX().whileTrue(shooterSubsystem.shootAtVoltageCommand(0.7)).onFalse(shooterSubsystem.stopShootingCommand());
-        // driverLogitechController.getY().whileTrue(shooterSubsystem.shootAtVoltageCommand(-0.7)).onFalse(shooterSubsystem.stopShootingCommand());
-
+        // driverLogitechController.getY().whileTrue(shooterSubsystem.shootAtVoltageCommand(-0.7)).onFalse(shooterSubsystem.stopShootingCommand());        
 //        driverLogitechController.getDPadLeft().onTrue(swerveDriveSubsystem.autoDriveForwardCommand());
 
         // Toggle between the intake down and intake up
@@ -151,17 +151,51 @@ public class RobotContainer {
         // shooterSubsystem.setDefaultCommand(shooterSubsystem.getDefaultCommand());
     }
 
+    // Autonomous path that shoots, moves forward while intaking, moves back and shoots
+    public Command autoCenterPath() {
+        return new SequentialCommandGroup(
+            shooterSubsystem.shootAtVoltageCommand(),
+            new WaitCommand(2),
+            intakeSubsystem.outtakeCommand(),
+            new WaitCommand(1),
+            intakeSubsystem.intakeCommand(),
+            shooterSubsystem.stopShootingCommand(),
+            intakeSubsystem.goToIntakePosition(),
+            new WaitCommand(1),
+            swerveDriveSubsystem.autoDriveCommand(1.5, 0),
+            intakeSubsystem.goToIntakeHome(),
+            // Start ramping up before we get there
+            shooterSubsystem.shootAtVoltageCommand(),
+            swerveDriveSubsystem.autoDriveCommand(-1.5, 0),
+            intakeSubsystem.outtakeCommand(),
+            new WaitCommand(1),
+            intakeSubsystem.stopMotorCommand(),
+            shooterSubsystem.stopShootingCommand()
+        );
+    }
+
+    public Command autoTestDrive() {
+        return new SequentialCommandGroup(
+            swerveDriveSubsystem.autoDriveCommand(2, 0),
+            new WaitCommand(2),
+            swerveDriveSubsystem.autoDriveCommand(0, 2),
+            new WaitCommand(2),
+            swerveDriveSubsystem.autoDriveCommand(-2, -2)
+        );
+    }
+    //hello!
+
 
     /** @return The axis used to drive forwards, scaled and limited by the slew rate limiter */
     public double getDriveForwardAxis() {
         return -forwardRateLimiter.calculate(
-            square(deadband(driverLogitechController.getLeftYAxis().getRaw(), 0.05)) * Constants.SwerveConstants.maxSpeed);
+            square(deadband(driverLogitechController.getLeftYAxis().getRaw(), 0.05)) * swerveDriveSubsystem.getMaxSpeedSupplier().getAsDouble());
     }
         
     /** @return The axis used to strafe, scaled and limited by the slew rate limiter */
     public double getDriveStrafeAxis() {
         return -strafeRateLimiter.calculate(
-            square(deadband(driverLogitechController.getLeftXAxis().getRaw(), 0.05)) * Constants.SwerveConstants.maxSpeed);            
+            square(deadband(driverLogitechController.getLeftXAxis().getRaw(), 0.05)) * swerveDriveSubsystem.getMaxSpeedSupplier().getAsDouble());            
     }
                 
     /** @return The axis used to turn, scaled and limited by the slew rate limiter */

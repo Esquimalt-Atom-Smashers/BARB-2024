@@ -113,7 +113,7 @@ public final class IntakeSubsystem extends SubsystemBase {
         rotationController.setD(IntakeConstants.ROTATION_CONTROLLER_KD);
         rotationController.setIZone(IntakeConstants.ROTATION_CONTROLLER_IZ);
         rotationController.setFF(IntakeConstants.ROTATION_CONTROLLER_FF);
-        rotationController.setOutputRange(-0.5, 0.5);
+        rotationController.setOutputRange(-0.75, 0.75);
     }
 
     /** @return Command that starts intaking */

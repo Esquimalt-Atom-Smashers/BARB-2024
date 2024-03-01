@@ -46,6 +46,8 @@ public class Robot extends TimedRobot {
   public static String selectedAutonomous = "Testing";
   private RobotContainer m_robotContainer;
 
+  public SendableChooser<Command> autonomousChooser = new SendableChooser<>();
+
 
 
   /**
@@ -59,6 +61,9 @@ public class Robot extends TimedRobot {
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer(this);
     // m_robotContainer.autonomousController.sendOption();
+    autonomousChooser.setDefaultOption("Test", m_robotContainer.autoTestDrive());
+    autonomousChooser.addOption("Center", m_robotContainer.autoCenterPath());
+    SmartDashboard.putData("Autonomous Mode", autonomousChooser);
     controllerType.addOption("Logitech", selectedController);
     controllerType.addOption("XBox", selectedController);
     SmartDashboard.putData("Controller Type", controllerType);
@@ -103,6 +108,12 @@ public class Robot extends TimedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
+    
+    // This will be used in the future when we want to pick which auto
+    // autonomousChooser.getSelected().schedule();
+    // Currently, just use the test one
+    m_robotContainer.autoTestDrive().schedule();
+
     // if (m_robotContainer.getAutoCommand() != null) {
     //   m_robotContainer.getAutoCommand().schedule();
     // }
