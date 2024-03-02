@@ -27,12 +27,13 @@ public class TrapDoorSubsystem extends SubsystemBase {
     leftSolenoid = new DoubleSolenoid(0, PneumaticsModuleType.CTREPCM, Constants.TrapDoorConstants.FORWARD_PORT, Constants.TrapDoorConstants.REVERSE_PORT);
     rightSolenoid = new DoubleSolenoid(1, PneumaticsModuleType.CTREPCM, 1, 0);
     winch = new CANSparkMax(5, CANSparkLowLevel.MotorType.kBrushless);
+    retract();
   }
 
 
-  public Command winch() {
+  public Command winchCommand() {
     return runOnce(() -> {
-        winch.set(0.80);
+        winch.set(-20);
     });
   }
 
@@ -40,6 +41,10 @@ public class TrapDoorSubsystem extends SubsystemBase {
     return runOnce(() -> {
       winch.set(-0.80);
     });
+  }
+
+  public Command stopWinchMotor() {
+    return runOnce(() -> winch.set(0));
   }
 
   
@@ -59,14 +64,14 @@ public class TrapDoorSubsystem extends SubsystemBase {
 
   /** Extend the pneumatics */
   private void extend() {
-    leftSolenoid.set(Value.kForward);
-    rightSolenoid.set(Value.kForward);
+    leftSolenoid.set(Value.kReverse);
+    rightSolenoid.set(Value.kReverse);
   }
 
   /** Retract the pnematics */
   private void retract() {
-    leftSolenoid.set(Value.kReverse);
-    rightSolenoid.set(Value.kReverse);
+    leftSolenoid.set(Value.kForward);
+    rightSolenoid.set(Value.kForward);
   }
 
   private void stop() {

@@ -79,12 +79,12 @@ public final class Constants {
 
       /* Swerve Current Limiting */
       public static final int angleContinuousCurrentLimit = 25;
-      public static final int anglePeakCurrentLimit = 35;
+      public static final int anglePeakCurrentLimit = 35; // 45
       public static final double anglePeakCurrentDuration = 0.1;
       public static final boolean angleEnableCurrentLimit = true;
 
       public static final int driveContinuousCurrentLimit = 35;
-      public static final int drivePeakCurrentLimit = 50;
+      public static final int drivePeakCurrentLimit = 40; //60
       public static final double drivePeakCurrentDuration = 0.1;
       public static final boolean driveEnableCurrentLimit = true;
 
@@ -249,7 +249,7 @@ public final class Constants {
         public static final double OUTTAKE_MAX_RPM = -2000;
         public static final double ROTATION_MAX_RPM = -1;
 
-        public static final double ROTATION_MAX_VOLTAGE = -1;
+        public static final double ROTATION_MAX_VOLTAGE = 12.2;
         public static final double INTAKE_MAX_VOLTAGE = 12.2;
 
         public static final double INTAKE_RPM = 4000;

@@ -39,8 +39,9 @@ import frc.robot.subsystems.BlinkinSubsystem.BlinkinValue;
  */
 public class RobotContainer {
     private LogitechController driverLogitechController;
+    private LogitechController operatorLogitechController;
 
-    // public AutonomousController autonomousController;
+    public AutonomousController autonomousController;
 
     // private final LogitechController operatorControllerLogitech = new LogitechController(1);
 
@@ -56,17 +57,29 @@ public class RobotContainer {
     /** The shooter on the robot */
     public final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
     public final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
-    // private final TrapDoorSubsystem trapDoorSubsystem = new TrapDoorSubsystem();
+    private final TrapDoorSubsystem trapDoorSubsystem = new TrapDoorSubsystem();
     private final BlinkinSubsystem blinkinSubsystem = new BlinkinSubsystem();
-
+    
+    public boolean intakeControls;
+    
     public RobotContainer(TimedRobot robot) {
+        autonomousController = new AutonomousController(this);
+        autonomousController.sendOption();
+        
         driverLogitechController = new LogitechController(0);
+        operatorLogitechController = new LogitechController(1);
         configureLogitechBindings();
     }
     
     /** Configure the controls for the logitech controller */
     private void configureLogitechBindings() {
         // if (driverLogitechController == null) return;
+
+        // Trapdoor
+        driverLogitechController.getDPadUp().onTrue(trapDoorSubsystem.extendCommand());
+        driverLogitechController.getDPadDown().onTrue(trapDoorSubsystem.retractCommand());
+
+        driverLogitechController.getDPadRight().onTrue(trapDoorSubsystem.winchCommand()).onFalse(trapDoorSubsystem.stopWinchMotor());
         
         // LJ - Updown = Forward/Reverse (DRIVE)
         // RJ - Left/Right = Strafe (DRIVE)
@@ -90,22 +103,20 @@ public class RobotContainer {
             // = Intake
             //        driverLogitechController.getX().whileTrue(intakeSubsystem.intakeCommand()).onFalse(intakeSubsystem.stopMotorCommand());
             //        driverLogitechController.getY().whileTrue(intakeSubsystem.outtakeCommand()).onFalse(intakeSubsystem.stopMotorCommand());
-
-            // driverLogitechController.getDPadUp().onTrue(trapDoorSubsystem.extendCommand());
-            // driverLogitechController.getDPadDown().onTrue(trapDoorSubsystem.retractCommand());
             
             // Only be able to control the intake if it starts in the upper position
             // UNCOMMENT
             if (intakeSubsystem.isAtUpperPosition()) {
-                SmartDashboard.putString("Intake Limit Switch", "Initialized");
-                driverLogitechController.getX().onTrue(intakeSubsystem.goToIntakeHome());
-                driverLogitechController.getY().onTrue(intakeSubsystem.goToIntakePosition());
-                driverLogitechController.getB().onTrue(intakeSubsystem.goToAMPPosition());
-                driverLogitechController.getRightTrigger().whileTrue(intakeSubsystem.shootAmpCommand()).onFalse(intakeSubsystem.stopMotorCommand());
-                driverLogitechController.getRightBumper().whileTrue(intakeSubsystem.intakeCommand()).onFalse(intakeSubsystem.stopMotorCommand());
+                bindIntakeCommands();    
             }
             else {
-                SmartDashboard.putString("Intake Limit Switch", "NOT initialized. Press switch and restart code.");
+                intakeControls = false;
+                operatorLogitechController.getA().onTrue(intakeSubsystem.moveIntakeManualCommand()).onFalse(intakeSubsystem.stopMotorCommand());
+                new Trigger(() -> intakeSubsystem.isAtUpperPosition()).onTrue(new InstantCommand(() -> {
+                    bindIntakeCommands();
+
+                }));
+                SmartDashboard.putString("Intake Controls", "NOT initialized. Press switch and restart code.");
                 System.out.println("!!! Intake subsystem didn't start in the correct position !!!");
             }
             
@@ -116,9 +127,8 @@ public class RobotContainer {
             // Intake Rotation (PID)
             //        driverLogitechController.getLeftBumper().whileTrue(intakeSubsystem.raiseIntakeCommandPID());
             //        driverLogitechController.getRightBumper().whileTrue(intakeSubsystem.lowerIntakeCommandPID());
-            
-            
-        driverLogitechController.getLeftBumper().onTrue(swerveDriveSubsystem.autoDriveForwardCommand());
+                        
+        // driverLogitechController.getLeftBumper().onTrue(swerveDriveSubsystem.autoDriveForwardCommand());
         // driverLogitechController.getDPadRight().onTrue(shooterSubsystem.setAppliedVoltage(0.05));
         // driverLogitechController.getDPadLeft().onTrue(shooterSubsystem.setAppliedVoltage(-0.05));
                 
@@ -136,19 +146,25 @@ public class RobotContainer {
         driverLogitechController.getLeftBumper().whileTrue(swerveDriveSubsystem.enableSlowMode()).onFalse(swerveDriveSubsystem.disableSlowMode());
         // driverLogitechController.getX().whileTrue(shooterSubsystem.shootAtVoltageCommand(0.7)).onFalse(shooterSubsystem.stopShootingCommand());
         // driverLogitechController.getY().whileTrue(shooterSubsystem.shootAtVoltageCommand(-0.7)).onFalse(shooterSubsystem.stopShootingCommand());        
-//        driverLogitechController.getDPadLeft().onTrue(swerveDriveSubsystem.autoDriveForwardCommand());
-
-        // Toggle between the intake down and intake up
-        // operatorControllerLogitech.getA().onTrue(new ConditionalCommand(
-        //     intakeSubsystem.lowerIntakeCommand(), 
-        //     intakeSubsystem.raiseIntakeCommand(), 
-        //     intakeSubsystem::isUp));
-
+        // driverLogitechController.getDPadLeft().onTrue(swerveDriveSubsystem.autoDriveForwardCommand());
         // driveController.getA().whileTrue(
         // swerveDriveSubsystem.rotateCenterApriltagCommand(() -> 0.05,
         // limelightSubsystem.getAprilTagXOffset()));
         // driveController.getB().onTrue(blinkinSubsystem.updateColour(BlinkinValue.CONFETTI));
         // shooterSubsystem.setDefaultCommand(shooterSubsystem.getDefaultCommand());
+    }
+
+    private void bindIntakeCommands() {
+        intakeControls = true;
+        SmartDashboard.putString("Intake Controls", "Initialized");
+        driverLogitechController.getX().onTrue(intakeSubsystem.goToIntakeHome());
+        driverLogitechController.getY().onTrue(intakeSubsystem.goToIntakePosition());
+        driverLogitechController.getB().onTrue(intakeSubsystem.goToAMPPosition());
+        driverLogitechController.getRightTrigger().whileTrue(intakeSubsystem.shootAmpCommand()).onFalse(intakeSubsystem.stopMotorCommand());
+        driverLogitechController.getRightBumper().whileTrue(intakeSubsystem.intakeCommand()).onFalse(intakeSubsystem.stopMotorCommand());
+        // driverLogitechController.getLeftTrigger().whileTrue(intakeSubsystem.shootAmpCommand()).onFalse(intakeSubsystem.stopMotorCommand());
+        // driverLogitechController.getLeftBumper().whileTrue(intakeSubsystem.intakeCommand()).onFalse(intakeSubsystem.stopMotorCommand());
+
     }
 
     // Autonomous path that shoots, moves forward while intaking, moves back and shoots
@@ -177,6 +193,7 @@ public class RobotContainer {
     public Command autoTestDrive() {
         return new SequentialCommandGroup(
             swerveDriveSubsystem.autoDriveCommand(2, 0),
+            new InstantCommand(() -> System.out.println("Command done")),
             new WaitCommand(2),
             swerveDriveSubsystem.autoDriveCommand(0, 2),
             new WaitCommand(2),
@@ -234,7 +251,7 @@ public class RobotContainer {
         return swerveDriveSubsystem;
     }
 
-    // public Command getAutoCommand() {
-    //     return autonomousController.getAutonomousCommand();
-    // }
+    public Command getAutoCommand() {
+        return autonomousController.getAutonomousCommand();
+    }
 }

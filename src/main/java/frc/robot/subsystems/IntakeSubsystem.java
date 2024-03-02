@@ -15,15 +15,19 @@ import com.revrobotics.CANSparkLowLevel.MotorType;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
+import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
 import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants;
+import frc.robot.RotateIntakeCommand;
 import frc.robot.Constants.IntakeConstants;
 import frc.robot.subsystems.BlinkinSubsystem.BlinkinValue;
 
@@ -33,8 +37,10 @@ import frc.robot.subsystems.BlinkinSubsystem.BlinkinValue;
 public final class IntakeSubsystem extends SubsystemBase {
     /** Motor for rotating the intake into intake and index position. */
     public boolean hasNote = false;
-    private final CANSparkMax rotationMotor;
+    public final CANSparkMax rotationMotor;
     private final CANSparkMax intakeMotor;
+
+    public final DutyCycleEncoder encoder = new DutyCycleEncoder(-1); //change later
 
     private final SparkPIDController intakeController;
     private final SparkPIDController rotationController;
@@ -66,7 +72,7 @@ public final class IntakeSubsystem extends SubsystemBase {
     public void periodic() {
         if (intakeMotor.getOutputCurrent() > 20) {
             currentTimer++;
-            if (currentTimer > 5) { this.hasNote = true; }
+            if (currentTimer > 10) { this.hasNote = true; }
         } else { currentTimer = 0; }
 
         if (hasNote){
@@ -77,6 +83,8 @@ public final class IntakeSubsystem extends SubsystemBase {
         
         SmartDashboard.putBoolean(" Note in Intake", this.hasNote);
         SmartDashboard.putNumber("Intake Position", this.rotationMotor.getEncoder().getPosition());
+        SmartDashboard.putBoolean("Upper pressed?", isAtUpperPosition());
+        SmartDashboard.putBoolean("Lower pressed?", isAtLowerPosition());
 //        System.out.println("Is lower pressed?: " + isAtLowerPosition());
 //        System.out.println("Is upper pressed?: " + isAtUpperPosition());
     }
@@ -119,18 +127,24 @@ public final class IntakeSubsystem extends SubsystemBase {
     /** @return Command that starts intaking */
     public Command intakeCommand() {
         return new ParallelDeadlineGroup(new WaitUntilCommand(() -> hasNote), new InstantCommand(() -> intakeMotor.set(0.70))).andThen(stopMotorCommand());
+        // return runOnce(() -> intakeMotor.set(0.7));
         // return runOnce(() -> intakeMotor.set(hasNote ? 0 : 0.5));
     }
+
+    public Command autoIntakeCommand() {
+        return new ParallelRaceGroup(intakeCommand(), new WaitCommand(2));
+    }
+
     public Command goToIntakePosition() {
-        return runOnce(() -> rotationController.setReference(-73, ControlType.kPosition));
+        return new RotateIntakeCommand(this, -1, encoder); //rotations relative to start is -73
     }
 
     public Command goToAMPPosition() {
-        return runOnce(() -> rotationController.setReference(-33, ControlType.kPosition));
+        return new RotateIntakeCommand(this, -1, encoder); //rotations relative to start is -33
     }
 
     public Command goToIntakeHome() {
-        return runOnce(() -> rotationController.setReference(0, ControlType.kPosition));
+        return new RotateIntakeCommand(this, -1, encoder); //rotations relative to start is 0
     }
 
     public Command outtakeCommand() {
@@ -142,6 +156,17 @@ public final class IntakeSubsystem extends SubsystemBase {
             intakeMotor.set(-1);
             this.hasNote = false;
         });
+    }
+
+    public Command shootSlowCommand() {
+        return runOnce(() -> {
+            intakeMotor.set(-0.1);
+            this.hasNote = false;
+        });
+    }
+
+    public Command moveIntakeManualCommand() {
+        return runOnce(() -> rotationMotor.set(.1));
     }
 
 
@@ -212,9 +237,9 @@ public final class IntakeSubsystem extends SubsystemBase {
      * @param position The position to rotate to.
      */
     private void rotateIntake(double position) {
-        position = Math.min(position, IntakeConstants.ROTATION_MAX_RPM);
-        rotationController.setReference(position, ControlType.kPosition);
-    }
+        position = Math.min(position, IntakeConstants.ROTATION_MAX_RPM); //this is a mistake, it's the rotation motor not the intake motor and the input is a position not rpm
+        new RotateIntakeCommand(this, position, encoder).schedule();
+    } 
 
     /**
      * Intake at a specified velocity. 

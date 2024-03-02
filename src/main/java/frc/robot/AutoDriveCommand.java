@@ -11,6 +11,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
@@ -20,6 +21,7 @@ public class AutoDriveCommand extends Command{
     private double x, y;
     private SwerveDriveSubsystem drive;
     private Command command;
+    Timer timer;
 
     // This command drives some distance forward and sideways
     public AutoDriveCommand(SwerveDriveSubsystem swerveDriveSubsystem, double x, double y) {
@@ -27,12 +29,14 @@ public class AutoDriveCommand extends Command{
         this.y = y;
 
         drive = swerveDriveSubsystem;
+        timer = new Timer();
 
         addRequirements(swerveDriveSubsystem);
     }
 
     @Override
     public void initialize() {
+        timer.start();
         // Get our current pose
         Pose2d currentPose = drive.getPose();
 
@@ -58,19 +62,20 @@ public class AutoDriveCommand extends Command{
         // Don't flip the path
         path.preventFlipping = true;
         
-        // TODO: Path doesn't finish
         // Schedule the command to follow the path
-        command = new ParallelDeadlineGroup(new WaitCommand(2), AutoBuilder.followPath(path));
+        
+        AutoBuilder.followPath(path).schedule();
+        command = new WaitCommand(2);
         command.schedule();
     }
 
     @Override
     public boolean isFinished() {
-        return command.isFinished();
+        return timer.hasElapsed(2);
     }
 
-    @Override 
+    @Override
     public void end(boolean interrupted) {
-        command.end(interrupted);
+        timer.stop();
     }
 }
