@@ -57,7 +57,7 @@ public class RobotContainer {
     /** The shooter on the robot */
     public final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
     public final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
-    private final TrapDoorSubsystem trapDoorSubsystem = new TrapDoorSubsystem();
+    // private final TrapDoorSubsystem trapDoorSubsystem = new TrapDoorSubsystem();
     private final BlinkinSubsystem blinkinSubsystem = new BlinkinSubsystem();
     
     public boolean intakeControls;
@@ -76,10 +76,11 @@ public class RobotContainer {
         // if (driverLogitechController == null) return;
 
         // Trapdoor
-        driverLogitechController.getDPadUp().onTrue(trapDoorSubsystem.extendCommand());
-        driverLogitechController.getDPadDown().onTrue(trapDoorSubsystem.retractCommand());
+        // driverLogitechController.getDPadUp().onTrue(trapDoorSubsystem.extendCommand());
+        // driverLogitechController.getDPadDown().onTrue(trapDoorSubsystem.retractCommand());
 
-        driverLogitechController.getDPadRight().onTrue(trapDoorSubsystem.winchCommand()).onFalse(trapDoorSubsystem.stopWinchMotor());
+        // driverLogitechController.getDPadRight().onTrue(trapDoorSubsystem.winchCommand()).onFalse(trapDoorSubsystem.stopWinchMotor());
+        // driverLogitechController.getDPadLeft().onTrue(trapDoorSubsystem.unwinch()).onFalse(trapDoorSubsystem.stopWinchMotor());
         
         // LJ - Updown = Forward/Reverse (DRIVE)
         // RJ - Left/Right = Strafe (DRIVE)

@@ -33,13 +33,13 @@ public class TrapDoorSubsystem extends SubsystemBase {
 
   public Command winchCommand() {
     return runOnce(() -> {
-        winch.set(-20);
+        winch.set(-1);
     });
   }
 
   public Command unwinch() {
     return runOnce(() -> {
-      winch.set(-0.80);
+      winch.set(1);
     });
   }
 

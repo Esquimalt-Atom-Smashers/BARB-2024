@@ -21,17 +21,19 @@ public class RotateIntakeCommand extends Command{
         this.targetPosition = targetPosition;
         this.encoder = encoder; 
 
+        encoder.setDistancePerRotation(1);
+
         addRequirements(intake);
 
     }
 
-    @Override
+    @Override 
     public void execute() {
-        intake.rotationMotor.set(pidController.calculate(encoder.getAbsolutePosition(), targetPosition));
+        intake.rotationMotor.set(pidController.calculate(encoder.getDistance(), targetPosition)); //could be getAbsoluteValue()
     }
 
     @Override
     public boolean isFinished() {
-        return (encoder.getAbsolutePosition() > (targetPosition - giveOrTake)) && (encoder.getAbsolutePosition() < (targetPosition + giveOrTake));
+        return (encoder.getDistance() > (targetPosition - giveOrTake)) && (encoder.getDistance() < (targetPosition + giveOrTake));
     }
 }

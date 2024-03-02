@@ -7,6 +7,13 @@ package frc.robot;
 import com.ctre.phoenix6.controls.DutyCycleOut;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.hardware.TalonFX;
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
+import com.pathplanner.lib.util.PIDConstants;
+import com.pathplanner.lib.util.ReplanningConfig;
+
+import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.wpilibj.DutyCycleEncoder;
 
 /**
  * This code was adapted from https://github.com/FRC2539/javabot-2023/
@@ -44,7 +51,11 @@ public class Robot extends TimedRobot {
   public SendableChooser<String> autonomousMode = new SendableChooser<>();
   public static String selectedController = "Logitech";
   public static String selectedAutonomous = "Testing";
+  public static int p;
+  public static int i;
+  public static int d;
   private RobotContainer m_robotContainer;
+  PIDConstants rotationConstants;
 
 
 
@@ -62,6 +73,9 @@ public class Robot extends TimedRobot {
     controllerType.addOption("Logitech", selectedController);
     controllerType.addOption("XBox", selectedController);
     SmartDashboard.putData("Controller Type", controllerType);
+    SmartDashboard.putNumber("P", p);
+    SmartDashboard.putNumber("I", i);
+    SmartDashboard.putNumber("D", d);
 
     // autonomousMode.addOption("Testing", selectedAutonomous);
     // autonomousMode.addOption("Amp Side", selectedAutonomous);
@@ -83,6 +97,9 @@ public class Robot extends TimedRobot {
 
   @Override
   public void robotPeriodic() {
+    // DutyCycleEncoder encoder = new DutyCycleEncoder(1);
+    // encoder.setDistancePerRotation(1);
+    // System.out.println(encoder.getAbsolutePosition() + "||" + encoder.getDistance());
     // Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
     // commands, running already-scheduled commands, removing finished or interrupted commands,
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
@@ -103,6 +120,17 @@ public class Robot extends TimedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
+    rotationConstants = new PIDConstants(SmartDashboard.getNumber("P", 0), SmartDashboard.getNumber("I", 0), SmartDashboard.getNumber("D", 0));
+
+      // AutoBuilder.configureHolonomic(
+      // m_robotContainer.getSwerveDriveSubsystem()::getPose, 
+      // m_robotContainer.getSwerveDriveSubsystem()::resetPose, 
+      // m_robotContainer.getSwerveDriveSubsystem()::getVelocity, 
+      // m_robotContainer.getSwerveDriveSubsystem()::setVelocity, 
+      // new HolonomicPathFollowerConfig(new PIDConstants(5, 0, 0), rotationConstants, Constants.SwerveConstants.maxModuleSpeed, Constants.SwerveConstants.moduleTranslations[0].getNorm(), new ReplanningConfig()), 
+      // () -> false, 
+      // m_robotContainer.getSwerveDriveSubsystem());
+
     if (m_robotContainer.getAutoCommand() != null) {
       m_robotContainer.getAutoCommand().schedule();
     }
@@ -110,7 +138,7 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during autonomous. */
   @Override
-  public void autonomousPeriodic() {}
+  public void autonomousPeriodic() {System.out.println(rotationConstants.kP + ", " + rotationConstants.kI + ", " + rotationConstants.kD);}
 
   @Override
   public void teleopInit() {

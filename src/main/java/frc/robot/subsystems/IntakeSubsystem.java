@@ -6,6 +6,7 @@ import java.util.concurrent.BlockingDeque;
 
 import org.opencv.features2d.FastFeatureDetector;
 
+import com.revrobotics.CANSparkBase;
 import com.revrobotics.CANSparkMax;
 import com.revrobotics.SparkPIDController;
 import com.revrobotics.CANSparkBase.ControlType;
@@ -40,7 +41,7 @@ public final class IntakeSubsystem extends SubsystemBase {
     public final CANSparkMax rotationMotor;
     private final CANSparkMax intakeMotor;
 
-    public final DutyCycleEncoder encoder = new DutyCycleEncoder(-1); //change later
+    public final DutyCycleEncoder encoder = new DutyCycleEncoder(1); //change later
 
     private final SparkPIDController intakeController;
     private final SparkPIDController rotationController;
@@ -136,15 +137,16 @@ public final class IntakeSubsystem extends SubsystemBase {
     }
 
     public Command goToIntakePosition() {
-        return new RotateIntakeCommand(this, -1, encoder); //rotations relative to start is -73
+        //return new RotateIntakeCommand(this, -1, encoder); //rotations relative to start is -73
+        return runOnce(() -> rotationController.setReference(-73, CANSparkBase.ControlType.kPosition));
     }
 
     public Command goToAMPPosition() {
-        return new RotateIntakeCommand(this, -1, encoder); //rotations relative to start is -33
+        return runOnce(() -> rotationController.setReference(-33, CANSparkBase.ControlType.kPosition)); //rotations relative to start is -33
     }
 
     public Command goToIntakeHome() {
-        return new RotateIntakeCommand(this, -1, encoder); //rotations relative to start is 0
+        return runOnce(() -> rotationController.setReference(0, CANSparkBase.ControlType.kPosition)); //rotations relative to start is 0
     }
 
     public Command outtakeCommand() {
@@ -238,7 +240,7 @@ public final class IntakeSubsystem extends SubsystemBase {
      */
     private void rotateIntake(double position) {
         position = Math.min(position, IntakeConstants.ROTATION_MAX_RPM); //this is a mistake, it's the rotation motor not the intake motor and the input is a position not rpm
-        new RotateIntakeCommand(this, position, encoder).schedule();
+        //new RotateIntakeCommand(this, position, encoder).schedule();
     } 
 
     /**
