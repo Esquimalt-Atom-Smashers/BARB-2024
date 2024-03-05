@@ -1,4 +1,4 @@
-package frc.robot;
+package frc.robot.commands;
 
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
@@ -15,11 +15,11 @@ public class RotateIntakeCommand extends Command{
     private DutyCycleEncoder encoder;
     private PIDController pidController = new PIDController(0.04, ROTATION_CONTROLLER_KI, ROTATION_CONTROLLER_KD);
 
-    public RotateIntakeCommand(IntakeSubsystem intake, double targetPosition, DutyCycleEncoder encoder) {
+    public RotateIntakeCommand(IntakeSubsystem intake, double targetPosition) {
 
         this.intake = intake;
         this.targetPosition = targetPosition;
-        this.encoder = encoder; 
+        this.encoder = intake.getEncoder(); 
 
         encoder.setDistancePerRotation(1);
 
@@ -29,11 +29,11 @@ public class RotateIntakeCommand extends Command{
 
     @Override 
     public void execute() {
-        intake.rotationMotor.set(pidController.calculate(encoder.getDistance(), targetPosition)); //could be getAbsoluteValue()
+        intake.getRotationMotor().set(pidController.calculate(encoder.getDistance(), targetPosition)); //could be getAbsoluteValue()
     }
 
     @Override
     public boolean isFinished() {
-        return (encoder.getDistance() > (targetPosition - giveOrTake)) && (encoder.getDistance() < (targetPosition + giveOrTake));
+        return Math.abs(encoder.getDistance() - targetPosition) <= giveOrTake;
     }
 }

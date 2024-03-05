@@ -13,9 +13,9 @@ import frc.lib.gyro.ADISGyro;
 import frc.lib.gyro.NavXGyro;
 import frc.lib.swerve.SwerveDriveSignal;
 import frc.lib.swerve.SwerveModule;
-import frc.robot.AutoDriveCommand;
 import frc.robot.Constants;
 import frc.robot.Constants.SwerveConstants;
+import frc.robot.commands.AutoDriveCommand;
 
 import java.util.List;
 import java.util.concurrent.atomic.AtomicBoolean;

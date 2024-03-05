@@ -25,8 +25,8 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controller.LogitechController;
 import frc.robot.Constants.ControllerConstants;
 import frc.robot.Constants.ShooterConstants;
+import frc.robot.Constants.BlinkinConstants.BlinkinPattern;
 import frc.robot.subsystems.*;
-import frc.robot.subsystems.BlinkinSubsystem.BlinkinValue;
 
 /**
  * This class is where the bulk of the robot should be declared. Since
@@ -42,11 +42,6 @@ public class RobotContainer {
     private LogitechController operatorLogitechController;
 
     public AutonomousController autonomousController;
-
-    // private final LogitechController operatorControllerLogitech = new LogitechController(1);
-
-    // private final LogitechController operatorController = new
-    // LogitechController(ControllerConstants.OPERATOR_CONTROLLER);
 
     public static SlewRateLimiter forwardRateLimiter = new SlewRateLimiter(40, -40, 0);
     public static SlewRateLimiter strafeRateLimiter = new SlewRateLimiter(40, -40, 0);
@@ -67,67 +62,66 @@ public class RobotContainer {
         autonomousController.sendOption();
         
         driverLogitechController = new LogitechController(0);
+        driverLogitechController.getRightXAxis().setInverted(true);
         operatorLogitechController = new LogitechController(1);
         configureLogitechBindings();
     }
     
     /** Configure the controls for the logitech controller */
     private void configureLogitechBindings() {
-        // if (driverLogitechController == null) return;
 
         // Trapdoor
         // driverLogitechController.getDPadUp().onTrue(trapDoorSubsystem.extendCommand());
         // driverLogitechController.getDPadDown().onTrue(trapDoorSubsystem.retractCommand());
-
         // driverLogitechController.getDPadRight().onTrue(trapDoorSubsystem.winchCommand()).onFalse(trapDoorSubsystem.stopWinchMotor());
         // driverLogitechController.getDPadLeft().onTrue(trapDoorSubsystem.unwinch()).onFalse(trapDoorSubsystem.stopWinchMotor());
         
         // LJ - Updown = Forward/Reverse (DRIVE)
         // RJ - Left/Right = Strafe (DRIVE)
-        driverLogitechController.getRightXAxis().setInverted(true);
-
         swerveDriveSubsystem.setDefaultCommand(swerveDriveSubsystem.driveCommand(
             () -> getDriveForwardAxis(), () -> getDriveStrafeAxis(),
             () -> getDriveRotationAxis(), true));
             
         driverLogitechController.getBack().onTrue(swerveDriveSubsystem.resetGyro());
-            // DPAD = 90 degree snap
-            //        driverLogitechController.getDPadLeft().onTrue(swerveDriveSubsystem.snap90LeftCommand());
-            //        driverLogitechController.getDPadRight().onTrue(swerveDriveSubsystem.snap90RightCommand());
-            
-            // LJ Push - (Toggle) = Slowmode
-            //        driverLogitechController.getLeftJoystick().whileTrue(swerveDriveSubsystem.enableSlowMode()).onFalse(swerveDriveSubsystem.disableSlowMode());
-            
-            // driverLogitechController.getDPadUp().onTrue(blinkinSubsystem.setColor(BlinkinValue.SOLID_PINK));
-            // driverLogitechController.getDPadDown().onTrue(blinkinSubsystem.setColor(BlinkinValue.CONFETTI));
-            
-            // = Intake
-            //        driverLogitechController.getX().whileTrue(intakeSubsystem.intakeCommand()).onFalse(intakeSubsystem.stopMotorCommand());
-            //        driverLogitechController.getY().whileTrue(intakeSubsystem.outtakeCommand()).onFalse(intakeSubsystem.stopMotorCommand());
-            
-            // Only be able to control the intake if it starts in the upper position
-            // UNCOMMENT
-            if (intakeSubsystem.isAtUpperPosition()) {
-                bindIntakeCommands();    
-            }
-            else {
-                intakeControls = false;
-                operatorLogitechController.getA().onTrue(intakeSubsystem.moveIntakeManualCommand()).onFalse(intakeSubsystem.stopMotorCommand());
-                new Trigger(() -> intakeSubsystem.isAtUpperPosition()).onTrue(new InstantCommand(() -> {
-                    bindIntakeCommands();
+        // DPAD = 90 degree snap
+        //        driverLogitechController.getDPadLeft().onTrue(swerveDriveSubsystem.snap90LeftCommand());
+        //        driverLogitechController.getDPadRight().onTrue(swerveDriveSubsystem.snap90RightCommand());
+        
+        // LJ Push - (Toggle) = Slowmode
+        //        driverLogitechController.getLeftJoystick().whileTrue(swerveDriveSubsystem.enableSlowMode()).onFalse(swerveDriveSubsystem.disableSlowMode());
+        
+        // driverLogitechController.getDPadUp().onTrue(blinkinSubsystem.setColor(BlinkinValue.SOLID_PINK));
+        // driverLogitechController.getDPadDown().onTrue(blinkinSubsystem.setColor(BlinkinValue.CONFETTI));
+        
+        // = Intake
+        //        driverLogitechController.getX().whileTrue(intakeSubsystem.intakeCommand()).onFalse(intakeSubsystem.stopMotorCommand());
+        //        driverLogitechController.getY().whileTrue(intakeSubsystem.outtakeCommand()).onFalse(intakeSubsystem.stopMotorCommand());
+        
+        // Only be able to control the intake if it starts in the upper position
+        // UNCOMMENT
+        if (intakeSubsystem.isAtUpperPosition()) {
+            bindIntakeCommands();    
+        }
+        else {
+            intakeControls = false;
+            operatorLogitechController.getA().onTrue(intakeSubsystem.moveIntakeManualCommand()).onFalse(intakeSubsystem.stopMotorCommand());
+            new Trigger(() -> intakeSubsystem.isAtUpperPosition()).onTrue(new InstantCommand(() -> {
+                bindIntakeCommands();
 
-                }));
-                SmartDashboard.putString("Intake Controls", "NOT initialized. Press switch and restart code.");
-                System.out.println("!!! Intake subsystem didn't start in the correct position !!!");
-            }
-            
-            // Intake Rotation (Manual)
-            // driverLogitechController.getLeftBumper().whileTrue(intakeSubsystem.lowerIntakeCommand()).onFalse(intakeSubsystem.stopRotatingIntake());
-            // driverLogitechController.getRightBumper().whileTrue(intakeSubsystem.raiseIntakeCommand()).onFalse(intakeSubsystem.stopRotatingIntake());
-            
-            // Intake Rotation (PID)
-            //        driverLogitechController.getLeftBumper().whileTrue(intakeSubsystem.raiseIntakeCommandPID());
-            //        driverLogitechController.getRightBumper().whileTrue(intakeSubsystem.lowerIntakeCommandPID());
+            }));
+            SmartDashboard.putString("Intake Controls", "NOT initialized. Press switch and restart code.");
+            System.out.println("!!! Intake subsystem didn't start in the correct position !!!");
+        }
+
+        bindBlinkinCommands();
+        
+        // Intake Rotation (Manual)
+        // driverLogitechController.getLeftBumper().whileTrue(intakeSubsystem.lowerIntakeCommand()).onFalse(intakeSubsystem.stopRotatingIntake());
+        // driverLogitechController.getRightBumper().whileTrue(intakeSubsystem.raiseIntakeCommand()).onFalse(intakeSubsystem.stopRotatingIntake());
+        
+        // Intake Rotation (PID)
+        //        driverLogitechController.getLeftBumper().whileTrue(intakeSubsystem.raiseIntakeCommandPID());
+        //        driverLogitechController.getRightBumper().whileTrue(intakeSubsystem.lowerIntakeCommandPID());
                         
         // driverLogitechController.getLeftBumper().onTrue(swerveDriveSubsystem.autoDriveForwardCommand());
         // driverLogitechController.getDPadRight().onTrue(shooterSubsystem.setAppliedVoltage(0.05));
@@ -163,9 +157,10 @@ public class RobotContainer {
         driverLogitechController.getB().onTrue(intakeSubsystem.goToAMPPosition());
         driverLogitechController.getRightTrigger().whileTrue(intakeSubsystem.shootAmpCommand()).onFalse(intakeSubsystem.stopMotorCommand());
         driverLogitechController.getRightBumper().whileTrue(intakeSubsystem.intakeCommand()).onFalse(intakeSubsystem.stopMotorCommand());
-        // driverLogitechController.getLeftTrigger().whileTrue(intakeSubsystem.shootAmpCommand()).onFalse(intakeSubsystem.stopMotorCommand());
-        // driverLogitechController.getLeftBumper().whileTrue(intakeSubsystem.intakeCommand()).onFalse(intakeSubsystem.stopMotorCommand());
+    }
 
+    private void bindBlinkinCommands() {
+        new Trigger(() -> intakeSubsystem.hasNote()).onTrue(blinkinSubsystem.updatePattern(BlinkinPattern.PINK_STROBE)).onFalse(blinkinSubsystem.updatePattern(BlinkinPattern.SOLID_PINK));
     }
 
     // Autonomous path that shoots, moves forward while intaking, moves back and shoots

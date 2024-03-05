@@ -47,9 +47,8 @@ import frc.robot.subsystems.IntakeSubsystem;
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
   public static CTREConfigs ctreConfigs = new CTREConfigs();
-  public SendableChooser<String> controllerType = new SendableChooser<>();
+  
   public SendableChooser<String> autonomousMode = new SendableChooser<>();
-  public static String selectedController = "Logitech";
   public static String selectedAutonomous = "Testing";
   public static int p;
   public static int i;
@@ -65,14 +64,10 @@ public class Robot extends TimedRobot {
    */
   @Override
   public void robotInit() {
-    
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer(this);
     // m_robotContainer.autonomousController.sendOption();
-    controllerType.addOption("Logitech", selectedController);
-    controllerType.addOption("XBox", selectedController);
-    SmartDashboard.putData("Controller Type", controllerType);
     SmartDashboard.putNumber("P", p);
     SmartDashboard.putNumber("I", i);
     SmartDashboard.putNumber("D", d);
@@ -91,22 +86,16 @@ public class Robot extends TimedRobot {
    * <p>This runs after the mode specific periodic functions, but before LiveWindow and
    * SmartDashboard integrated updating.
    */
-
-  //  TalonFX turnMotor = new TalonFX(0);
-  //  DutyCycleOut out = new DutyCycleOut(0.2);
-
   @Override
   public void robotPeriodic() {
-    // DutyCycleEncoder encoder = new DutyCycleEncoder(1);
-    // encoder.setDistancePerRotation(1);
-    // System.out.println(encoder.getAbsolutePosition() + "||" + encoder.getDistance());
     // Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
     // commands, running already-scheduled commands, removing finished or interrupted commands,
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
-    // System.out.println(m_robotContainer.autonomousController.getAutonomousCommand().getName());
-    // turnMotor.setControl(out);
+    // DutyCycleEncoder encoder = new DutyCycleEncoder(1);
+    // encoder.setDistancePerRotation(1);
+    // System.out.println(encoder.getAbsolutePosition() + "||" + encoder.getDistance());
 
   }
 
@@ -120,16 +109,16 @@ public class Robot extends TimedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
-    rotationConstants = new PIDConstants(SmartDashboard.getNumber("P", 0), SmartDashboard.getNumber("I", 0), SmartDashboard.getNumber("D", 0));
+    // rotationConstants = new PIDConstants(SmartDashboard.getNumber("P", 0), SmartDashboard.getNumber("I", 0), SmartDashboard.getNumber("D", 0));
 
-      // AutoBuilder.configureHolonomic(
-      // m_robotContainer.getSwerveDriveSubsystem()::getPose, 
-      // m_robotContainer.getSwerveDriveSubsystem()::resetPose, 
-      // m_robotContainer.getSwerveDriveSubsystem()::getVelocity, 
-      // m_robotContainer.getSwerveDriveSubsystem()::setVelocity, 
-      // new HolonomicPathFollowerConfig(new PIDConstants(5, 0, 0), rotationConstants, Constants.SwerveConstants.maxModuleSpeed, Constants.SwerveConstants.moduleTranslations[0].getNorm(), new ReplanningConfig()), 
-      // () -> false, 
-      // m_robotContainer.getSwerveDriveSubsystem());
+    // AutoBuilder.configureHolonomic(
+    // m_robotContainer.getSwerveDriveSubsystem()::getPose, 
+    // m_robotContainer.getSwerveDriveSubsystem()::resetPose, 
+    // m_robotContainer.getSwerveDriveSubsystem()::getVelocity, 
+    // m_robotContainer.getSwerveDriveSubsystem()::setVelocity, 
+    // new HolonomicPathFollowerConfig(new PIDConstants(5, 0, 0), rotationConstants, Constants.SwerveConstants.maxModuleSpeed, Constants.SwerveConstants.moduleTranslations[0].getNorm(), new ReplanningConfig()), 
+    // () -> false, 
+    // m_robotContainer.getSwerveDriveSubsystem());
 
     if (m_robotContainer.getAutoCommand() != null) {
       m_robotContainer.getAutoCommand().schedule();
@@ -138,7 +127,9 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during autonomous. */
   @Override
-  public void autonomousPeriodic() {System.out.println(rotationConstants.kP + ", " + rotationConstants.kI + ", " + rotationConstants.kD);}
+  public void autonomousPeriodic() {
+    System.out.println(rotationConstants.kP + ", " + rotationConstants.kI + ", " + rotationConstants.kD);
+  }
 
   @Override
   public void teleopInit() {

@@ -1,64 +1,40 @@
 package frc.robot.subsystems;
 
-import com.ctre.phoenix.led.CANdle;
-import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.networktables.NetworkTableInstance;
-import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.PWM;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants.BlinkinConstants;
+import frc.robot.Constants.BlinkinConstants.BlinkinPattern;
 
+/** A subsystem that represents the blinkin lights on the robot. */
 public class BlinkinSubsystem extends SubsystemBase {
-    /**
-     * The port the blinkin is plugged into. 
-     */
-    private static final PWM blinkin = new PWM(0);
 
+    /** The blinkin lights on the robot. */
+    private final PWM blinkin = new PWM(BlinkinConstants.BLINKIN_PORT);
+
+    /**
+     * Constructs a BlinkinSubsystem. 
+     */
     public BlinkinSubsystem() {
-//        this.updateAllianceColour();
+        setColor(BlinkinPattern.SOLID_PINK);
     }
-
-    public static void setColor(BlinkinValue value) {
-        blinkin.setSpeed(value.pwm);
+    
+    /**
+     * @param pattern The pattern to set the lights to
+     * @return A command that sets the light to a specific pattern
+     */
+    public Command updatePattern(BlinkinPattern pattern) {
+        return runOnce(() -> {
+            setColor(pattern);
+        });
     }
-    /** Command which updates the LEDs to corrospond to the alliance we on. */
-//    public Command updateAllianceColour() {
-//        return runOnce(() -> {
-//            boolean isBlueAlliance = NetworkTableInstance.getDefault().getTable("FMSInfo").getEntry("IsBlueAlliance")
-//                    .getBoolean(true);
-//
-//            blinkin.set(isBlueAlliance ? BlinkinValue.SOLID_BLUE.pwm : BlinkinValue.SOLID_RED.pwm);
-//        });
-//    }
-//
-//    public Command updateColour(BlinkinValue value) {
-//        return runOnce(() -> {
-//            blinkin.set(value.pwm);
-//        });
-//    }
 
     /**
-     * Enum for all the colour values. Retrieved from:
-     * https://www.revrobotics.com/content/docs/REV-11-1105-UM.pdf
+     * Sets the lights to a specific pattern.
+     * 
+     * @param pattern The light pattern to set to
      */
-    public enum BlinkinValue {
-        /** Solid colours, no special effects. */
-        SOLID_RED(0.61),
-        SOLID_BLUE(0.87),
-        SOLID_PINK(0.57),
-        SOLID_PURPLE(0.91),
-        PINK_STROBE(0.15),
-        PINK_BREATH(0.09),
-
-        /** Patterned colours, w/ special effects. */
-        RAINBOW_WITH_GLITTER(-0.89),
-        CONFETTI(-0.87);
-
-        double pwm;
-
-        BlinkinValue(double pwm) {
-            this.pwm = MathUtil.clamp(pwm, -1.0, 1.0);
-        }
+    public void setColor(BlinkinConstants.BlinkinPattern pattern) {
+        blinkin.setSpeed(pattern.pwm);
     }
-
 }

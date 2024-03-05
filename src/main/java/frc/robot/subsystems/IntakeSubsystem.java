@@ -1,10 +1,6 @@
 package frc.robot.subsystems;
 
-import static edu.wpi.first.wpilibj2.command.Commands.waitUntil;
-
-import java.util.concurrent.BlockingDeque;
-
-import org.opencv.features2d.FastFeatureDetector;
+import static frc.robot.Constants.IntakeConstants.ENCODER_PORT;
 
 import com.revrobotics.CANSparkBase;
 import com.revrobotics.CANSparkMax;
@@ -14,7 +10,6 @@ import com.revrobotics.CANSparkBase.IdleMode;
 import com.revrobotics.CANSparkLowLevel.MotorType;
 
 import edu.wpi.first.math.MathUtil;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DutyCycleEncoder;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -23,28 +18,31 @@ import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.ParallelDeadlineGroup;
 import edu.wpi.first.wpilibj2.command.ParallelRaceGroup;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
 import frc.robot.Constants;
-import frc.robot.RotateIntakeCommand;
 import frc.robot.Constants.IntakeConstants;
-import frc.robot.subsystems.BlinkinSubsystem.BlinkinValue;
 
 /**
  * A subsystem that represents the intake motor, rotation motor, their PID controllers, and the two limit switches on the intake.
  */
 public final class IntakeSubsystem extends SubsystemBase {
+    /** Whether we currently have a note. */
+    private boolean hasNote = false;
+
     /** Motor for rotating the intake into intake and index position. */
-    public boolean hasNote = false;
-    public final CANSparkMax rotationMotor;
+    private final CANSparkMax rotationMotor;
+    /** Motor that rotates the wheels to intake and outtake the notes. */
     private final CANSparkMax intakeMotor;
 
-    public final DutyCycleEncoder encoder = new DutyCycleEncoder(1); //change later
+    /** The absolute encoder on the rotationMotor. */
+    private final DutyCycleEncoder encoder = new DutyCycleEncoder(ENCODER_PORT);
 
-    private final SparkPIDController intakeController;
+    /** The PID controller for the rotationMotor. */
     private final SparkPIDController rotationController;
+    /** The PID controller for the intakeMotor. */
+    private final SparkPIDController intakeController;
 
     private final DigitalInput lowerPositionLimit;
     private final DigitalInput upperPositionLimit;
@@ -75,12 +73,6 @@ public final class IntakeSubsystem extends SubsystemBase {
             currentTimer++;
             if (currentTimer > 10) { this.hasNote = true; }
         } else { currentTimer = 0; }
-
-        if (hasNote){
-            BlinkinSubsystem.setColor(BlinkinValue.PINK_STROBE);
-        } else {
-            BlinkinSubsystem.setColor(BlinkinValue.SOLID_PINK);
-        }
         
         SmartDashboard.putBoolean(" Note in Intake", this.hasNote);
         SmartDashboard.putNumber("Intake Position", this.rotationMotor.getEncoder().getPosition());
@@ -284,5 +276,17 @@ public final class IntakeSubsystem extends SubsystemBase {
     /** @return True is the intake is up or moving to up, false otherwise */
     public boolean isUp() {
         return isUp;
+    }
+
+    public boolean hasNote() {
+        return hasNote;
+    }
+
+    public DutyCycleEncoder getEncoder() {
+        return encoder;
+    }
+
+    public CANSparkMax getRotationMotor() {
+        return rotationMotor;
     }
 }

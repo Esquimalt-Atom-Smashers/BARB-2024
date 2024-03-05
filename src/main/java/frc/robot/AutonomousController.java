@@ -7,10 +7,7 @@ import com.pathplanner.lib.commands.PathPlannerAuto;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
-import edu.wpi.first.wpilibj2.command.WaitUntilCommand;
-import frc.robot.subsystems.ShooterSubsystem;
 
 import static edu.wpi.first.wpilibj2.command.Commands.*;
 
@@ -22,14 +19,15 @@ public class AutonomousController {
 
     public AutonomousController(RobotContainer robotContainer) {
         this.robotContainer = robotContainer;
+
+        center = new PathPlannerAuto("Center");
+        autoChooser = AutoBuilder.buildAutoChooser();
+        autoChooser.setDefaultOption("Center", center);
+        SmartDashboard.putData("AutonomousMode", autoChooser);
+
         NamedCommands.registerCommand("AutoShoot", getAutoShoot());
         NamedCommands.registerCommand("AutoRaiseIntake", getAutoRaiseIntake());
         NamedCommands.registerCommand("AutoLowerIntake", getAutoLowerIntake());
-
-        autoChooser = AutoBuilder.buildAutoChooser();
-
-        center = new PathPlannerAuto("Center");
-        autoChooser.setDefaultOption("Center", center);
     }
 
     private Command getAutoShoot() {

@@ -13,6 +13,7 @@ import com.pathplanner.lib.util.PIDConstants;
 import com.pathplanner.lib.util.ReplanningConfig;
 import com.revrobotics.CANSparkBase.IdleMode;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import frc.lib.swerve.SecondOrderSwerveKinematics;
@@ -38,6 +39,34 @@ public final class Constants {
 
       //public static final double minimumPressure = 100; // PSI
       //public static final double maximumPressure = 120; // try 120
+  }
+
+  public static final class BlinkinConstants {
+    public static final int BLINKIN_PORT = 0;
+
+    /**
+     * Enum for all the colour values. Retrieved from:
+     * https://www.revrobotics.com/content/docs/REV-11-1105-UM.pdf
+     */
+    public static enum BlinkinPattern {
+        /** Solid colours, no special effects. */
+        SOLID_RED(0.61),
+        SOLID_BLUE(0.87),
+        SOLID_PINK(0.57),
+        SOLID_PURPLE(0.91),
+        PINK_STROBE(0.15),
+        PINK_BREATH(0.09),
+
+        /** Patterned colours, w/ special effects. */
+        RAINBOW_WITH_GLITTER(-0.89),
+        CONFETTI(-0.87);
+
+        public double pwm;
+
+        BlinkinPattern(double pwm) {
+            this.pwm = MathUtil.clamp(pwm, -1.0, 1.0);
+        }
+    }
   }
 
   public static final class ControllerConstants {
@@ -218,6 +247,8 @@ public final class Constants {
 
         public static final int LOWER_LIMIT_SWITCH_PORT = 0;
         public static final int UPPER_LIMIT_SWITCH_PORT = 1;
+
+        public static final int ENCODER_PORT = 1;
 
         /** Hardware behaviour constants */
         public static final IdleMode INTAKE_IDLE_MODE = IdleMode.kBrake;
