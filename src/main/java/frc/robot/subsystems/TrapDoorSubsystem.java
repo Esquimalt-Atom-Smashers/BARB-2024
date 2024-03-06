@@ -8,73 +8,73 @@ import edu.wpi.first.wpilibj.PneumaticsModuleType;
 import edu.wpi.first.wpilibj.DoubleSolenoid.Value;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.robot.Constants;
+import frc.robot.Constants.TrapDoorConstants;
 
 /*
- * Subsystem representing the pneumatics on the shooter.
+ * Subsystem representing the pneumatics on the shooter and the winch .
  */
 public class TrapDoorSubsystem extends SubsystemBase {
-  private DoubleSolenoid leftSolenoid;
-  private DoubleSolenoid rightSolenoid;
-  private CANSparkMax winch;
+    private DoubleSolenoid leftSolenoid = new DoubleSolenoid(TrapDoorConstants.LEFT_PORT, PneumaticsModuleType.CTREPCM, TrapDoorConstants.LEFT_FORWARD_CHANNEL, TrapDoorConstants.LEFT_REVERSE_CHANNEL);
+    private DoubleSolenoid rightSolenoid = new DoubleSolenoid(TrapDoorConstants.RIGHT_PORT, PneumaticsModuleType.CTREPCM, TrapDoorConstants.RIGHT_FORWARD_CHANNEL, TrapDoorConstants.RIGHT_REVERSE_CHANNEL);
+    private CANSparkMax winch = new CANSparkMax(TrapDoorConstants.WINCH_PORT, CANSparkLowLevel.MotorType.kBrushless);
 
-  /**
-   * Constructs a TrapDoorSubsystem object. 
-   * Initializes the double solenoid that opens the trap door and lets us score into the amp.
-   */
-  public TrapDoorSubsystem(){
-    leftSolenoid = new DoubleSolenoid(0, PneumaticsModuleType.CTREPCM, Constants.TrapDoorConstants.FORWARD_PORT, Constants.TrapDoorConstants.REVERSE_PORT);
-    rightSolenoid = new DoubleSolenoid(1, PneumaticsModuleType.CTREPCM, 1, 0);
-    winch = new CANSparkMax(5, CANSparkLowLevel.MotorType.kBrushless);
-    retract();
-  }
+    /**
+     * Constructs a TrapDoorSubsystem object. 
+     * Also immediately retracts the pnematics
+     */
+    public TrapDoorSubsystem(){
+        retractPneumatics();
+    }
 
+    /** @return Command that starts winching in */
+    public Command winchCommand() {
+        return runOnce(() -> {
+            winch.set(-1);
+        });
+    }
 
-  public Command winchCommand() {
-    return runOnce(() -> {
-        winch.set(-1);
-    });
-  }
+    /** @return Command that starts winching out */
+    public Command unwinch() {
+        return runOnce(() -> {
+            winch.set(1);
+        });
+    }
 
-  public Command unwinch() {
-    return runOnce(() -> {
-      winch.set(1);
-    });
-  }
+    /** @return Command that stops the winch motor */
+    public Command stopWinchMotor() {
+        return runOnce(() -> winch.set(0));
+    }
+    
+    /** @return Command that extends the pneumatics */
+    public Command extendCommand() {
+        return runOnce(this::extendPneumatics);
+    }
 
-  public Command stopWinchMotor() {
-    return runOnce(() -> winch.set(0));
-  }
+    /** @return Command that retracts the pneumatics */
+    public Command retractCommand() {
+        return runOnce(this::retractPneumatics);
+    }
 
-  
-  /** @return Command that extends the pneumatics */
-  public Command extendCommand() {
-    return runOnce(this::extend);
-  }
+    /** @return Command that stops the pneumatics */
+    public Command stopCommand() {
+        return runOnce(this::stopPnematics);
+    }
 
-  /** @return Command that retracts the pneumatics */
-  public Command retractCommand() {
-    return runOnce(this::retract);
-  }
+    /** Extend the pneumatics */
+    private void extendPneumatics() {
+        leftSolenoid.set(Value.kReverse);
+        rightSolenoid.set(Value.kReverse);
+    }
 
-  public Command stopCommand() {
-    return runOnce(this::stop);
-  }
+    /** Retract the pneumatics */
+    private void retractPneumatics() {
+        leftSolenoid.set(Value.kForward);
+        rightSolenoid.set(Value.kForward);
+    }
 
-  /** Extend the pneumatics */
-  private void extend() {
-    leftSolenoid.set(Value.kReverse);
-    rightSolenoid.set(Value.kReverse);
-  }
-
-  /** Retract the pnematics */
-  private void retract() {
-    leftSolenoid.set(Value.kForward);
-    rightSolenoid.set(Value.kForward);
-  }
-
-  private void stop() {
-    leftSolenoid.set(Value.kOff);
-    rightSolenoid.set(Value.kOff);
-  }
+    /** Stop the pneumatics */
+    private void stopPnematics() {
+        leftSolenoid.set(Value.kOff);
+        rightSolenoid.set(Value.kOff);
+    }
 }

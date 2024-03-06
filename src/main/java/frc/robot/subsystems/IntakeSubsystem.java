@@ -230,6 +230,7 @@ public final class IntakeSubsystem extends SubsystemBase {
      * 
      * @param position The position to rotate to.
      */
+    @SuppressWarnings("unused")
     private void rotateIntake(double position) {
         position = Math.min(position, IntakeConstants.ROTATION_MAX_RPM); //this is a mistake, it's the rotation motor not the intake motor and the input is a position not rpm
         //new RotateIntakeCommand(this, position, encoder).schedule();
@@ -240,6 +241,7 @@ public final class IntakeSubsystem extends SubsystemBase {
      * 
      * @param rpm The velocity to rotate at (in rpm)
      */
+    @SuppressWarnings("unused")
     private void intake(double rpm) {
         intakeController.setReference(MathUtil.clamp(rpm, rpm, IntakeConstants.INTAKE_MAX_RPM), ControlType.kVelocity);
     }
@@ -249,11 +251,13 @@ public final class IntakeSubsystem extends SubsystemBase {
      * 
      * @param rpm The velocity to rotate at (in rpm)
      */
+    @SuppressWarnings("unused")
     private void outtake(double rpm) {
         intakeController.setReference(-MathUtil.clamp(rpm, rpm, IntakeConstants.OUTTAKE_MAX_RPM) , ControlType.kVelocity);
     }
 
     /** Stop the rotation motor */
+    @SuppressWarnings("unused")
     private void stopRotation() {
         rotationMotor.set(0);
     }
@@ -278,14 +282,17 @@ public final class IntakeSubsystem extends SubsystemBase {
         return isUp;
     }
 
+    /** @return True is we are currently holding a note, false otherwise */
     public boolean hasNote() {
         return hasNote;
     }
 
+    /** @return The absolute encoder on the rotation motor */
     public DutyCycleEncoder getEncoder() {
         return encoder;
     }
 
+    /** @return The rotation motor */
     public CANSparkMax getRotationMotor() {
         return rotationMotor;
     }

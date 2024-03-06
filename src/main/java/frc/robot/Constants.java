@@ -4,8 +4,6 @@
 
 package frc.robot;
 
-import java.util.Arrays;
-
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
 import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
@@ -260,7 +258,7 @@ public final class Constants {
         public static final boolean INTAKE_MOTOR_INVERTED = false;
         public static final boolean ROTATION_MOTOR_INVERTED = true;
 
-        /** PID Controller constants */ //TODO: determine values
+        /** PID Controller constants */
         public static final double INTAKE_CONTROLLER_KP = 6e-5; 
         public static final double INTAKE_CONTROLLER_KI = 0; 
         public static final double INTAKE_CONTROLLER_KD = 0; 
@@ -295,6 +293,8 @@ public final class Constants {
 
         public static final double VOLTAGE_COMPENSATION = 12.2;
 
+        public static final double SHOOTING_VOLTAGE = 0.70;
+
         public static final double LEFT_SHOOTER_PID_K_P = -1; 
         public static final double LEFT_SHOOTER_PID_K_I = -1; 
         public static final double LEFT_SHOOTER_PID_K_D = -1; 
@@ -309,7 +309,14 @@ public final class Constants {
     }
     
     public static class TrapDoorConstants {
-        public static final int FORWARD_PORT = 0;
-        public static final int REVERSE_PORT = 1;
+        public static final int LEFT_PORT = 0;
+        public static final int LEFT_FORWARD_CHANNEL = 0;
+        public static final int LEFT_REVERSE_CHANNEL = 1;
+
+        public static final int RIGHT_PORT = 1;
+        public static final int RIGHT_FORWARD_CHANNEL = 1;
+        public static final int RIGHT_REVERSE_CHANNEL = 0;
+
+        public static final int WINCH_PORT = 5;
     }
 }
