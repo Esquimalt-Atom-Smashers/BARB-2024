@@ -6,8 +6,12 @@ package frc.robot;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.signals.SensorDirectionValue;
+import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
+import com.pathplanner.lib.util.PIDConstants;
+import com.pathplanner.lib.util.ReplanningConfig;
 import com.revrobotics.CANSparkBase.IdleMode;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import frc.lib.swerve.SecondOrderSwerveKinematics;
@@ -35,6 +39,34 @@ public final class Constants {
       //public static final double maximumPressure = 120; // try 120
   }
 
+  public static final class BlinkinConstants {
+    public static final int BLINKIN_PORT = 0;
+
+    /**
+     * Enum for all the colour values. Retrieved from:
+     * https://www.revrobotics.com/content/docs/REV-11-1105-UM.pdf
+     */
+    public static enum BlinkinPattern {
+        /** Solid colours, no special effects. */
+        SOLID_RED(0.61),
+        SOLID_BLUE(0.87),
+        SOLID_PINK(0.57),
+        SOLID_PURPLE(0.91),
+        PINK_STROBE(0.15),
+        PINK_BREATH(0.09),
+
+        /** Patterned colours, w/ special effects. */
+        RAINBOW_WITH_GLITTER(-0.89),
+        CONFETTI(-0.87);
+
+        public double pwm;
+
+        BlinkinPattern(double pwm) {
+            this.pwm = MathUtil.clamp(pwm, -1.0, 1.0);
+        }
+    }
+  }
+
   public static final class ControllerConstants {
       public static final int DRIVE_CONTROLLER = 0;
       public static final int OPERATOR_CONTROLLER = 1;
@@ -42,7 +74,7 @@ public final class Constants {
 
 
   public static final class SwerveConstants extends CompBotConstants {
-    
+      
   }
 
   public static class CompBotConstants {
@@ -54,7 +86,7 @@ public final class Constants {
       public static final double wheelDiameter = Units.inchesToMeters(4.0);
       public static final double wheelCircumference = wheelDiameter * Math.PI;
 
-      public static final double robotMass = Units.lbsToKilograms(45);
+      public static final double robotMass = Units.lbsToKilograms(100);
 
       public static final double openLoopRamp = 0.25; // 0.25
       public static final double closedLoopRamp = 0.0;
@@ -74,22 +106,24 @@ public final class Constants {
 
       /* Swerve Current Limiting */
       public static final int angleContinuousCurrentLimit = 25;
-      public static final int anglePeakCurrentLimit = 40;
+      public static final int anglePeakCurrentLimit = 35; // 45
       public static final double anglePeakCurrentDuration = 0.1;
       public static final boolean angleEnableCurrentLimit = true;
 
       public static final int driveContinuousCurrentLimit = 35;
-      public static final int drivePeakCurrentLimit = 60;
+      public static final int drivePeakCurrentLimit = 40; //60
       public static final double drivePeakCurrentDuration = 0.1;
       public static final boolean driveEnableCurrentLimit = true;
 
+      public static double maxModuleSpeed = 1.25;
+
       /* Angle Motor PID Values */
-      public static final double angleKP = 43;
+      public static final double angleKP = 45; // 43
       public static final double angleKI = 0.0;
       public static final double angleKD = 0.0;
 
       /* Drive Motor PID Values */
-      public static final double driveKP = 0.1;
+      public static final double driveKP = 0.2;
       public static final double driveKI = 0.0;
       public static final double driveKD = 0.0;
 
@@ -111,14 +145,14 @@ public final class Constants {
       public static final double angleKA = (0.003 / 12);
 
       /* Swerve Profiling Values */
-      public static final double maxSpeed = 5.00; // (6.52) meters per second
-      public static final double maxAcceleration =
+      public static final double maxSpeed = 5; // (6.52) meters per second
+      public static final double maxAcceleration = 
               (stallTorque * driveGearRatio * 4) / (wheelDiameter * robotMass); // 16.52; // meters per second^2
-      public static final double maxAngularVelocity = 5; // rad/s
-        //       / Arrays.stream(moduleTranslations)
-        //               .map(translation -> translation.getNorm())
-        //               .max(Double::compare)
-        //               .get();
+      public static final double maxAngularVelocity = 6; // rad/s // 5
+            //    Arrays.stream(moduleTranslations)
+            //           .map(translation -> translation.getNorm())
+            //           .max(Double::compare)
+            //           .get();
 
       /* Calculated Characterization Values */
       public static final double calculatedDriveKS = 0;
@@ -145,6 +179,15 @@ public final class Constants {
 
       /* Angle Encoder Invert */
       public static final SensorDirectionValue canCoderInvert = SensorDirectionValue.CounterClockwise_Positive;
+
+      /* PathPlanner Configuration */
+      public static final HolonomicPathFollowerConfig pathFollowerConfig = new HolonomicPathFollowerConfig(
+      new PIDConstants(5, 0, 0), // Translation constants default = 5
+      new PIDConstants(7, 0, 0), // Rotation constants 
+      maxModuleSpeed, 
+      moduleTranslations[0].getNorm(), // Drive base radius (distance from center to furthest module) 
+      new ReplanningConfig()
+    );
 
       /* Module Specific Constants */
       // Note, bevel gears should face left (relative to back-to-front)
@@ -197,11 +240,13 @@ public final class Constants {
 
     public static final class IntakeConstants {
         /** Hardware ports */
-        public static final int INTAKE_MOTOR_PORT = -1;
-        public static final int ROTATION_MOTOR_PORT = -1;
+        public static final int INTAKE_MOTOR_PORT = 3;
+        public static final int ROTATION_MOTOR_PORT = 4;
 
-        public static final double INTAKE_LIMIT_SWITCH_PORT = -1;
-        public static final double ROTATION_LIMIT_SWITCH_PORT = -1;
+        public static final int LOWER_LIMIT_SWITCH_PORT = 0;
+        public static final int UPPER_LIMIT_SWITCH_PORT = 1;
+
+        public static final int ENCODER_PORT = 1;
 
         /** Hardware behaviour constants */
         public static final IdleMode INTAKE_IDLE_MODE = IdleMode.kBrake;
@@ -211,25 +256,67 @@ public final class Constants {
         public static final double ROTATION_VOLTAGE_COMPENSATION = 12.2;
 
         public static final boolean INTAKE_MOTOR_INVERTED = false;
-        public static final boolean ROTATION_MOTOR_INVERTED = false;
+        public static final boolean ROTATION_MOTOR_INVERTED = true;
 
-        /** PID Controller constants */ //TODO: determine values
+        /** PID Controller constants */
         public static final double INTAKE_CONTROLLER_KP = 6e-5; 
         public static final double INTAKE_CONTROLLER_KI = 0; 
         public static final double INTAKE_CONTROLLER_KD = 0; 
         public static final double INTAKE_CONTROLLER_IZ = 0; 
         public static final double INTAKE_CONTROLLER_FF = 1.5e-5; 
 
+        public static final double ROTATION_CONTROLLER_KP = -1;
+        public static final double ROTATION_CONTROLLER_KI = -1;
+        public static final double ROTATION_CONTROLLER_KD = -1;
+        public static final double ROTATION_CONTROLLER_IZ = -1;
+        public static final double ROTATION_CONTROLLER_FF = -1;
+
+        // HI -JAKE
+
         /** Velocity Constants */
         public static final double INTAKE_MAX_RPM = 5000;
         public static final double OUTTAKE_MAX_RPM = -2000;
+        public static final double ROTATION_MAX_RPM = -1;
+
+        public static final double ROTATION_MAX_VOLTAGE = 12.2;
+        public static final double INTAKE_MAX_VOLTAGE = 12.2;
 
         public static final double INTAKE_RPM = 4000;
         public static final double OUTTAKE_RPM = 3000;
+        public static final double INTAKE_TO_INDEX_RPM = -1;
+        public static final double INTAKE_TO_INTAKE_RPM = 1;
     }
 
     public static class ShooterConstants {
-        public static final int LEFT_SHOOTER_PORT = -1;
-        public static final int RIGHT_SHOOTER_PORT = -1;
+        public static final int LEFT_SHOOTER_PORT = 2;
+        public static final int RIGHT_SHOOTER_PORT = 1;
+
+        public static final double VOLTAGE_COMPENSATION = 12.2;
+
+        public static final double SHOOTING_VOLTAGE = 0.70;
+
+        public static final double LEFT_SHOOTER_PID_K_P = -1; 
+        public static final double LEFT_SHOOTER_PID_K_I = -1; 
+        public static final double LEFT_SHOOTER_PID_K_D = -1; 
+
+        public static final double RIGHT_SHOOTER_PID_K_P = -1; 
+        public static final double RIGHT_SHOOTER_PID_K_I = -1; 
+        public static final double RIGHT_SHOOTER_PID_K_D = -1; 
+
+        public static final double MAX_SHOOTER_RPM = -1;
+        
+        public static final double SHOOT_RPM = -1;     
+    }
+    
+    public static class TrapDoorConstants {
+        public static final int LEFT_PORT = 0;
+        public static final int LEFT_FORWARD_CHANNEL = 0;
+        public static final int LEFT_REVERSE_CHANNEL = 1;
+
+        public static final int RIGHT_PORT = 1;
+        public static final int RIGHT_FORWARD_CHANNEL = 1;
+        public static final int RIGHT_REVERSE_CHANNEL = 0;
+
+        public static final int WINCH_PORT = 5;
     }
 }

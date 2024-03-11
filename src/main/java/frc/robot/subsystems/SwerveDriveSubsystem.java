@@ -6,18 +6,30 @@ import edu.wpi.first.math.kinematics.SwerveDriveKinematics;
 import edu.wpi.first.math.kinematics.SwerveDriveOdometry;
 import edu.wpi.first.math.kinematics.SwerveModulePosition;
 import edu.wpi.first.math.kinematics.SwerveModuleState;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+
 import frc.lib.gyro.ADISGyro;
 import frc.lib.swerve.SwerveDriveSignal;
 import frc.lib.swerve.SwerveModule;
 import frc.robot.Constants;
+import frc.robot.Constants.SwerveConstants;
+import frc.robot.commands.AutoDriveCommand;
+
+import java.util.List;
 import java.util.function.DoubleSupplier;
+
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.path.GoalEndState;
+import com.pathplanner.lib.path.PathConstraints;
+import com.pathplanner.lib.path.PathPlannerPath;
+
 import frc.lib.swerve.SwerveModuleConstants;
 
 public class SwerveDriveSubsystem extends SubsystemBase {
     /** The current pose of the robot. */
-    private Pose2d pose = new Pose2d();
+    // private Pose2d pose = new Pose2d();
 
     /** The current velocity and previous velocity of the robot. */
     private ChassisSpeeds velocity = new ChassisSpeeds();
@@ -27,18 +39,17 @@ public class SwerveDriveSubsystem extends SubsystemBase {
 
     /** Array of the swerve modules on the robot */
     private SwerveModule[] modules;
-
     private ADISGyro gyro;
 
     /** Max speed supplier. */
     private DoubleSupplier maxSpeedSupplier = () -> Constants.SwerveConstants.maxSpeed;
 
+    private SwerveDriveOdometry odometry;
+    
     /**
      * Constructs a SwerveDriveSubsystem object.
      * Initializes the gyro, modules, and any autonmous variables.
      */
-    private SwerveDriveOdometry odometry;
-
     public SwerveDriveSubsystem() {
         gyro = new ADISGyro();
 
@@ -50,8 +61,18 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         };
 
         odometry = new SwerveDriveOdometry(Constants.SwerveConstants.swerveKinematics, getGyroRotation(), getModulePositions());
-    }
 
+        //Configures pathplanner
+        AutoBuilder.configureHolonomic(
+            this::getPose, 
+            this::resetPose, 
+            this::getVelocity, 
+            this::setVelocity, 
+            Constants.SwerveConstants.pathFollowerConfig, 
+            () -> false, //Change this later 
+            this);
+    }
+    
     /**
      * Command used for driving during tele-operated mode.
      * 
@@ -62,19 +83,64 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      * 
      * @return A command object.
      */
-    public Command driveCommand(
-            DoubleSupplier forward, DoubleSupplier strafe, DoubleSupplier rotation, boolean isFieldOriented) {
+    public Command driveCommand(DoubleSupplier forward, DoubleSupplier strafe, DoubleSupplier rotation, boolean isFieldOriented) {
         return run(() -> {
             setVelocity(
-                    new ChassisSpeeds(forward.getAsDouble(), strafe.getAsDouble(), rotation.getAsDouble()),
+                    new ChassisSpeeds(forward.getAsDouble(), strafe.getAsDouble(), -rotation.getAsDouble()),
                     isFieldOriented);
         });
     }
 
+    public Command snap90LeftCommand() {
+        Rotation2d startingRotation = getRotation();
+        Rotation2d targetRotation = startingRotation.plus(new Rotation2d(Math.toRadians(90)));
+
+        return runOnce(() -> {
+            while (getRotation().getDegrees() < targetRotation.getDegrees()) {
+                setVelocity(new ChassisSpeeds(0,0,-SwerveConstants.maxAngularVelocity));
+            }
+            setVelocity(new ChassisSpeeds(0,0,0));
+        });
+    }
+
+    public Command snap90RightCommand() {
+        Rotation2d startingRotation = getRotation();
+        Rotation2d targetRotation = startingRotation.minus(new Rotation2d(Math.toRadians(90)));
+
+        return runOnce(() -> {
+            while (getRotation().getDegrees() < targetRotation.getDegrees()) {
+                setVelocity(new ChassisSpeeds(0,0,SwerveConstants.maxAngularVelocity));
+            }
+            setVelocity(new ChassisSpeeds(0,0,0));
+        });
+    }
+
+    public Command enableSlowMode() {
+        return runOnce(() -> {
+            setCustomMaxSpeedSupplier(() -> 3);
+        });
+    }
+
+
+    public Command disableSlowMode() {
+        return runOnce(() -> resetMaxSpeedSupplier());
+    }
+
+    private void resetMaxSpeedSupplier() {
+        this.maxSpeedSupplier = () -> SwerveConstants.maxSpeed;
+    }
+
+    public DoubleSupplier getMaxSpeedSupplier() {
+        return maxSpeedSupplier;
+    }
     /**
      * Command which 'should' make the robot try and rotate to center with an
      * apriltag.
      */
+    public Command resetGyro() {
+        return runOnce(() -> gyro.reset());
+    }
+
     public Command rotateCenterApriltagCommand(DoubleSupplier min_rotation, double tx) {
         double Kp = 0.1;
         return run(() -> {
@@ -98,15 +164,68 @@ public class SwerveDriveSubsystem extends SubsystemBase {
         });
     }
 
+    // Distance in meters
+    public Command autoDriveCommand(double x, double y) {
+        return new AutoDriveCommand(this, x, y);
+    }
+
+    // This command is only used to test autonomous
+    // The command drives forwards 2 meters in the x direction
+    public Command autoDriveForwardCommand() {
+        return runOnce(() -> {
+            // Get our current pose
+            Pose2d currentPose = getPose();
+
+            // Create the start pose, and the end pose which is 2 meters in the positive x-direction
+            Pose2d startPose = new Pose2d(currentPose.getTranslation(), new Rotation2d());
+            Pose2d endPose = new Pose2d(currentPose.getTranslation().plus(new Translation2d(2.0, 0.0)), new Rotation2d());
+
+            // Create a list of points 
+            List<Translation2d> bezierPoints = PathPlannerPath.bezierFromPoses(startPose, endPose);
+            
+            // Create the autonomous path
+            PathPlannerPath path = new PathPlannerPath(
+                bezierPoints, 
+                new PathConstraints(
+                    4.0, 
+                    4.0,
+                    Units.degreesToRadians(360), 
+                    Units.degreesToRadians(540)
+                    ), 
+                // Our desired end state is not moving and facing the same
+                new GoalEndState(0.0, new Rotation2d(Math.toRadians(180)))
+            );
+
+            // Don't flip the path
+            path.preventFlipping = true;
+ 
+            // Schedule the command to follow the path
+            AutoBuilder.followPath(path).schedule();
+        });
+    }
+
     /** Sets the custom max speed(m/s) of the drivetrain. */
     public void setCustomMaxSpeedSupplier(DoubleSupplier maxSpeedSupplier) {
         this.maxSpeedSupplier = maxSpeedSupplier;
     }
 
-    /** @return The pose of the robot. */
+    /** @return The pose of the robot. (used in pathplanner)*/
     public Pose2d getPose() {
-        return pose;
+        //return pose; isn't pose always 0?
+        return odometry.getPoseMeters();
     }
+
+    /** Resets pose of the robot. (used in pathplanner) */
+    public void resetPose(Pose2d pose) {
+        odometry.resetPosition(getGyroRotation(), getModulePositions(), pose);
+    }
+
+    // public void driveRobotRelative(ChassisSpeeds robotRelativeSpeeds) {
+    //     ChassisSpeeds targetSpeeds = ChassisSpeeds.discretize(robotRelativeSpeeds, 0.02);
+    
+    //     SwerveModuleState[] targetStates = Constants.SwerveConstants.swerveKinematics.toSwerveModuleStates(targetSpeeds);
+    //     setModuleStates(targetStates, false);
+    //   }    
 
     /** @return The robot relative velocity of the drivetrain. */
     public ChassisSpeeds getVelocity() {
@@ -196,10 +315,10 @@ public class SwerveDriveSubsystem extends SubsystemBase {
      */
     public void update() {
         updateOdometry();
-
         updateModules(driveSignal);
         odometry.update(getGyroRotation(), getModulePositions());
 
+        //System.out.println(getPose());
     }
 
     /** Updates the current robot odometry. */
@@ -249,7 +368,7 @@ public class SwerveDriveSubsystem extends SubsystemBase {
     @Override
     public void periodic() {
         update();
-        System.out.println("Gyro Rotation: " + gyro.getRotation2d());
+//        System.out.println("Gyro Rotation: " + gyro.getRotation2d());
     }
 
     /** @return the current states of all the swerve modules. */

@@ -7,7 +7,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.SerialPort;
 
 public class NavXGyro {
-    private AHRS navX = new AHRS(SerialPort.Port.kUSB1);
+    private AHRS navX = new AHRS(SerialPort.Port.kMXP);
     public NavXGyro() {}
 
     public Rotation2d getRotation2d() {

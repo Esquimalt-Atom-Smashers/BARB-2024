@@ -1,0 +1,55 @@
+{
+  "version": 1.0,
+  "startingPose": {
+    "position": {
+      "x": 1.39,
+      "y": 5.56
+    },
+    "rotation": 0.0
+  },
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "AutoShoot"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AutoLowerIntake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Move to Note (Center)"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AutoRaiseIntake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Move to Speaker (Center)"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "AutoShoot"
+          }
+        }
+      ]
+    }
+  },
+  "folder": null,
+  "choreoAuto": false
+}

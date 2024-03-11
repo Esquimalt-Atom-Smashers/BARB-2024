@@ -4,9 +4,7 @@
 
 package frc.robot;
 
-import com.ctre.phoenix6.controls.DutyCycleOut;
-import com.ctre.phoenix6.controls.VoltageOut;
-import com.ctre.phoenix6.hardware.TalonFX;
+import com.pathplanner.lib.util.PIDConstants;
 
 /**
  * This code was adapted from https://github.com/FRC2539/javabot-2023/
@@ -39,9 +37,15 @@ import frc.lib.swerve.CTREConfigs;
 public class Robot extends TimedRobot {
   private Command m_autonomousCommand;
   public static CTREConfigs ctreConfigs = new CTREConfigs();
-  public SendableChooser<String> controllerType = new SendableChooser<>();
-  public static String selectedController = "Logitech";
+  
+  public SendableChooser<String> autonomousMode = new SendableChooser<>();
+  public static String selectedAutonomous = "Testing";
+  public static int p;
+  public static int i;
+  public static int d;
   private RobotContainer m_robotContainer;
+  PIDConstants rotationConstants;
+
 
 
   /**
@@ -53,9 +57,16 @@ public class Robot extends TimedRobot {
     // Instantiate our RobotContainer.  This will perform all our button bindings, and put our
     // autonomous chooser on the dashboard.
     m_robotContainer = new RobotContainer(this);
-    controllerType.addOption("Logitech", selectedController);
-    controllerType.addOption("XBox", selectedController);
-    SmartDashboard.putData("Controller Type", controllerType);
+    // m_robotContainer.autonomousController.sendOption();
+    SmartDashboard.putNumber("P", p);
+    SmartDashboard.putNumber("I", i);
+    SmartDashboard.putNumber("D", d);
+
+    // autonomousMode.addOption("Testing", selectedAutonomous);
+    // autonomousMode.addOption("Amp Side", selectedAutonomous);
+    // autonomousMode.addOption("Center", selectedAutonomous);
+    // autonomousMode.addOption("Source Side", selectedAutonomous);
+    // SmartDashboard.putData("Autonomous Mode", autonomousMode);
   }
 
   /**
@@ -65,10 +76,6 @@ public class Robot extends TimedRobot {
    * <p>This runs after the mode specific periodic functions, but before LiveWindow and
    * SmartDashboard integrated updating.
    */
-
-  //  TalonFX turnMotor = new TalonFX(0);
-  //  DutyCycleOut out = new DutyCycleOut(0.2);
-
   @Override
   public void robotPeriodic() {
     // Runs the Scheduler.  This is responsible for polling buttons, adding newly-scheduled
@@ -76,7 +83,9 @@ public class Robot extends TimedRobot {
     // and running subsystem periodic() methods.  This must be called from the robot's periodic
     // block in order for anything in the Command-based framework to work.
     CommandScheduler.getInstance().run();
-    // turnMotor.setControl(out);
+    // DutyCycleEncoder encoder = new DutyCycleEncoder(1);
+    // encoder.setDistancePerRotation(1);
+    // System.out.println(encoder.getAbsolutePosition() + "||" + encoder.getDistance());
 
   }
 
@@ -90,12 +99,27 @@ public class Robot extends TimedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
+    // rotationConstants = new PIDConstants(SmartDashboard.getNumber("P", 0), SmartDashboard.getNumber("I", 0), SmartDashboard.getNumber("D", 0));
 
+    // AutoBuilder.configureHolonomic(
+    // m_robotContainer.getSwerveDriveSubsystem()::getPose, 
+    // m_robotContainer.getSwerveDriveSubsystem()::resetPose, 
+    // m_robotContainer.getSwerveDriveSubsystem()::getVelocity, 
+    // m_robotContainer.getSwerveDriveSubsystem()::setVelocity, 
+    // new HolonomicPathFollowerConfig(new PIDConstants(5, 0, 0), rotationConstants, Constants.SwerveConstants.maxModuleSpeed, Constants.SwerveConstants.moduleTranslations[0].getNorm(), new ReplanningConfig()), 
+    // () -> false, 
+    // m_robotContainer.getSwerveDriveSubsystem());
+
+    if (m_robotContainer.getAutoCommand() != null) {
+      m_robotContainer.getAutoCommand().schedule();
+    }
   }
 
   /** This function is called periodically during autonomous. */
   @Override
-  public void autonomousPeriodic() {}
+  public void autonomousPeriodic() {
+    System.out.println(rotationConstants.kP + ", " + rotationConstants.kI + ", " + rotationConstants.kD);
+  }
 
   @Override
   public void teleopInit() {
