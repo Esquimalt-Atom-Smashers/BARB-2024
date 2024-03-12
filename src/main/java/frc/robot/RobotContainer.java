@@ -45,6 +45,9 @@ public class RobotContainer {
     
     public boolean intakeControls;
     
+    /**Makes robot container
+     * @param robot - because...
+     */
     public RobotContainer(TimedRobot robot) {
         autonomousController = new AutonomousController(this);
         autonomousController.sendOption();
@@ -137,6 +140,7 @@ public class RobotContainer {
         // shooterSubsystem.setDefaultCommand(shooterSubsystem.getDefaultCommand());
     }
 
+    /**The name says it all! */
     private void bindIntakeCommands() {
         intakeControls = true;
         SmartDashboard.putString("Intake Controls", "Initialized");
@@ -147,11 +151,12 @@ public class RobotContainer {
         driverLogitechController.getRightBumper().whileTrue(intakeSubsystem.intakeCommand()).onFalse(intakeSubsystem.stopMotorCommand());
     }
 
+    /**Makes the robot flash pink whenever a note is picked up and glow solid pink when there is no note. */
     private void bindBlinkinCommands() {
         new Trigger(() -> intakeSubsystem.hasNote()).onTrue(blinkinSubsystem.updatePattern(BlinkinPattern.PINK_STROBE)).onFalse(blinkinSubsystem.updatePattern(BlinkinPattern.SOLID_PINK));
     }
 
-    // Autonomous path that shoots, moves forward while intaking, moves back and shoots
+    /**Autonomous path that shoots, moves forward while intaking, moves back and shoots */
     public Command autoCenterPath() {
         return new SequentialCommandGroup(
             shooterSubsystem.shootAtVoltageCommand(),
@@ -174,6 +179,7 @@ public class RobotContainer {
         );
     }
 
+    /**Just drives a bit I guess */
     public Command autoTestDrive() {
         return new SequentialCommandGroup(
             swerveDriveSubsystem.autoDriveCommand(2, 0),
@@ -231,10 +237,16 @@ public class RobotContainer {
         return Math.copySign(value * value, value);
     }
 
+    /**Its pretty self explanatory
+     * @return One lovely SwerveDriveSubsystem!
+     */
     public SwerveDriveSubsystem getSwerveDriveSubsystem() {
         return swerveDriveSubsystem;
     }
 
+    /**Does just that!
+     * @return Command - the selected autonomous command
+     */
     public Command getAutoCommand() {
         return autonomousController.getAutonomousCommand();
     }

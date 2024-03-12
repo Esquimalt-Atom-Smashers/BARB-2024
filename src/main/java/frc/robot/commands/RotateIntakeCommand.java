@@ -15,6 +15,10 @@ public class RotateIntakeCommand extends Command{
     private DutyCycleEncoder encoder;
     private PIDController pidController = new PIDController(0.04, ROTATION_CONTROLLER_KI, ROTATION_CONTROLLER_KD);
 
+    /**Rotates the intake using a fancy absolute encoder
+     * @param intake - the intake subsystem so it can actually move the intake
+     * @param targetPosition - however much you want to rotate the intake
+     */
     public RotateIntakeCommand(IntakeSubsystem intake, double targetPosition) {
 
         this.intake = intake;

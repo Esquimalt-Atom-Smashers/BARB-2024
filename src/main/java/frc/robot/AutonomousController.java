@@ -17,6 +17,9 @@ public class AutonomousController {
     SendableChooser<Command> autoChooser;
     public PathPlannerAuto center;
 
+    /** Builds all associated commands for autonomous! 
+     * @param RobotContainer to control subsystems 
+     */
     public AutonomousController(RobotContainer robotContainer) {
         this.robotContainer = robotContainer;
 
@@ -30,6 +33,9 @@ public class AutonomousController {
         NamedCommands.registerCommand("AutoLowerIntake", getAutoLowerIntake());
     }
 
+    /**Shoots a note preloaded in the intake.
+     * @return Command 
+     */
     private Command getAutoShoot() {
         return sequence(
             robotContainer.shooterSubsystem.shootAtVoltageCommand(),
@@ -40,7 +46,10 @@ public class AutonomousController {
             robotContainer.intakeSubsystem.stopMotorCommand()
         );
     }
-
+    
+    /**Lowers and uses the intake
+     * @return Command
+     */
     private Command getAutoLowerIntake() {
         return sequence(
             robotContainer.intakeSubsystem.goToIntakePosition(),
@@ -49,6 +58,9 @@ public class AutonomousController {
         );
     }
 
+    /**Stops and raises the intake
+     * @return Command 
+     */ 
     private Command getAutoRaiseIntake() {
         return sequence(
             robotContainer.intakeSubsystem.stopMotorCommand(),
@@ -56,10 +68,14 @@ public class AutonomousController {
         );
     }
 
+    /**Returns the autonomous mode selected by the user in the SmartDashboard
+     * @return Command
+     */
     public Command getAutonomousCommand() {
         return autoChooser.getSelected();
     }
 
+    /**Adds a selector for the autonomous mode in the SmardDashboard */
     public void sendOption() {
         SmartDashboard.putData("Auto Mode", autoChooser);
     }

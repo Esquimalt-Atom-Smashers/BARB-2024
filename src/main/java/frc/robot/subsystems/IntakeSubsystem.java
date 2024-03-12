@@ -100,7 +100,7 @@ public final class IntakeSubsystem extends SubsystemBase {
         // intakeController.setOutputRange(-1, 1);
     }
 
-    /**\
+    /**
      * Configures the rotation motor and its PID controller. 
      */
     private void configureRotationMotor() {
@@ -124,27 +124,45 @@ public final class IntakeSubsystem extends SubsystemBase {
         // return runOnce(() -> intakeMotor.set(hasNote ? 0 : 0.5));
     }
 
+    /**Command used by impatient Auto
+     * @return Command
+     */
     public Command autoIntakeCommand() {
         return new ParallelRaceGroup(intakeCommand(), new WaitCommand(2));
     }
 
+    /**Goes to the position used for intaking
+     * @return Command
+     */
     public Command goToIntakePosition() {
         //return new RotateIntakeCommand(this, -1, encoder); //rotations relative to start is -73
         return runOnce(() -> rotationController.setReference(-73, CANSparkBase.ControlType.kPosition));
     }
 
+    /**Goes to the positions used to throw note into the amp
+     * @return Command
+     */
     public Command goToAMPPosition() {
         return runOnce(() -> rotationController.setReference(-33, CANSparkBase.ControlType.kPosition)); //rotations relative to start is -33
     }
 
+    /**Goes back to the original starting position
+     * @return Command
+     */
     public Command goToIntakeHome() {
         return runOnce(() -> rotationController.setReference(0, CANSparkBase.ControlType.kPosition)); //rotations relative to start is 0
     }
 
+    /**Makes the intake spit out its note
+     * @return Command
+     */
     public Command outtakeCommand() {
         return runOnce(() -> intakeMotor.set(-1));
     }
 
+    /**Shoots the note in the amp
+     * @return Command
+     */
     public Command shootAmpCommand() {
         return runOnce(() -> {
             intakeMotor.set(-1);
@@ -152,6 +170,9 @@ public final class IntakeSubsystem extends SubsystemBase {
         });
     }
 
+    /**Outakes slowly so we don't break things
+     * @return Command
+     */
     public Command shootSlowCommand() {
         return runOnce(() -> {
             intakeMotor.set(-0.1);
@@ -159,6 +180,9 @@ public final class IntakeSubsystem extends SubsystemBase {
         });
     }
 
+    /**Moves the intake motor slowly (intake direction)
+     * @return Command
+     */
     public Command moveIntakeManualCommand() {
         return runOnce(() -> rotationMotor.set(.1));
     }
@@ -221,6 +245,9 @@ public final class IntakeSubsystem extends SubsystemBase {
         return run(() -> {});
     }
 
+    /**The name is self explanatory
+     * @return Command
+     */
     public Command stopRotatingIntake() {
         return runOnce(() -> rotationMotor.set(0));
     }

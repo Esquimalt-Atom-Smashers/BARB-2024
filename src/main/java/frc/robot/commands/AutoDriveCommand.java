@@ -22,7 +22,11 @@ public class AutoDriveCommand extends Command{
     private Command command;
     Timer timer;
 
-    // This command drives some distance forward and sideways
+    /**Goes wherever you tell it!
+     * @param swerveDriveSubsystem - to drive obviously
+     * @param x - however much you want to move on the x axis
+     * @param y - however much you want to move on the y axis
+     */
     public AutoDriveCommand(SwerveDriveSubsystem swerveDriveSubsystem, double x, double y) {
         this.x = x;
         this.y = y;
