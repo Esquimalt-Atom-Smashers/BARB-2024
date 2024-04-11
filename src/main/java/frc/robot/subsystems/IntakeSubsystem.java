@@ -1,6 +1,6 @@
 package frc.robot.subsystems;
 
-import static frc.robot.Constants.IntakeConstants.ENCODER_PORT;
+import static frc.robot.Constants.IntakeConstants.ABSOLUTE_ENCODER_PORT;
 
 import com.revrobotics.CANSparkBase;
 import com.revrobotics.CANSparkMax;
@@ -37,7 +37,7 @@ public final class IntakeSubsystem extends SubsystemBase {
     private final CANSparkMax intakeMotor;
 
     /** The absolute encoder on the rotationMotor. */
-    private final DutyCycleEncoder encoder = new DutyCycleEncoder(ENCODER_PORT);
+    private final DutyCycleEncoder encoder = new DutyCycleEncoder(ABSOLUTE_ENCODER_PORT);
 
     /** The PID controller for the rotationMotor. */
     private final SparkPIDController rotationController;
@@ -301,7 +301,9 @@ public final class IntakeSubsystem extends SubsystemBase {
 
      /** @return True if the upper limit switch is being pressed */
     public boolean isAtUpperPosition() {
-        return upperPositionLimit.get();
+        // This is temporarily set to true because there isn't the metal bit on the limit switch
+        return true;
+        // return upperPositionLimit.get();
     }
 
     /** @return True is the intake is up or moving to up, false otherwise */

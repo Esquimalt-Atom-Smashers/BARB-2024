@@ -4,7 +4,10 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+import com.pathplanner.lib.util.HolonomicPathFollowerConfig;
 import com.pathplanner.lib.util.PIDConstants;
+import com.pathplanner.lib.util.ReplanningConfig;
 
 /**
  * This code was adapted from https://github.com/FRC2539/javabot-2023/
@@ -61,7 +64,8 @@ public class Robot extends TimedRobot {
     SmartDashboard.putNumber("P", p);
     SmartDashboard.putNumber("I", i);
     SmartDashboard.putNumber("D", d);
-
+    // TODO: Set the lights to pink at the start.
+    
     // autonomousMode.addOption("Testing", selectedAutonomous);
     // autonomousMode.addOption("Amp Side", selectedAutonomous);
     // autonomousMode.addOption("Center", selectedAutonomous);
@@ -99,16 +103,16 @@ public class Robot extends TimedRobot {
   /** This autonomous runs the autonomous command selected by your {@link RobotContainer} class. */
   @Override
   public void autonomousInit() {
-    // rotationConstants = new PIDConstants(SmartDashboard.getNumber("P", 0), SmartDashboard.getNumber("I", 0), SmartDashboard.getNumber("D", 0));
+    rotationConstants = new PIDConstants(SmartDashboard.getNumber("P", 0), SmartDashboard.getNumber("I", 0), SmartDashboard.getNumber("D", 0));
 
-    // AutoBuilder.configureHolonomic(
-    // m_robotContainer.getSwerveDriveSubsystem()::getPose, 
-    // m_robotContainer.getSwerveDriveSubsystem()::resetPose, 
-    // m_robotContainer.getSwerveDriveSubsystem()::getVelocity, 
-    // m_robotContainer.getSwerveDriveSubsystem()::setVelocity, 
-    // new HolonomicPathFollowerConfig(new PIDConstants(5, 0, 0), rotationConstants, Constants.SwerveConstants.maxModuleSpeed, Constants.SwerveConstants.moduleTranslations[0].getNorm(), new ReplanningConfig()), 
-    // () -> false, 
-    // m_robotContainer.getSwerveDriveSubsystem());
+    AutoBuilder.configureHolonomic(
+    m_robotContainer.getSwerveDriveSubsystem()::getPose, 
+    m_robotContainer.getSwerveDriveSubsystem()::resetPose, 
+    m_robotContainer.getSwerveDriveSubsystem()::getVelocity, 
+    m_robotContainer.getSwerveDriveSubsystem()::setVelocity, 
+    new HolonomicPathFollowerConfig(new PIDConstants(5, 0, 0), rotationConstants, Constants.SwerveConstants.maxModuleSpeed, Constants.SwerveConstants.moduleTranslations[0].getNorm(), new ReplanningConfig()), 
+    () -> false, 
+    m_robotContainer.getSwerveDriveSubsystem());
 
     if (m_robotContainer.getAutoCommand() != null) {
       m_robotContainer.getAutoCommand().schedule();

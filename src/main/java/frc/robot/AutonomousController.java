@@ -16,6 +16,7 @@ public class AutonomousController {
 
     SendableChooser<Command> autoChooser;
     public PathPlannerAuto center;
+    public PathPlannerAuto testing;
 
     /** Builds all associated commands for autonomous! 
      * @param RobotContainer to control subsystems 
@@ -24,9 +25,12 @@ public class AutonomousController {
         this.robotContainer = robotContainer;
 
         center = new PathPlannerAuto("Center");
+        testing = new PathPlannerAuto("Testing");
+
         autoChooser = AutoBuilder.buildAutoChooser();
-        autoChooser.setDefaultOption("Center", center);
-        SmartDashboard.putData("AutonomousMode", autoChooser);
+        //autoChooser.setDefaultOption("Center", center);
+        autoChooser.setDefaultOption("Testing", testing);
+        //SmartDashboard.putData("AutonomousMode", autoChooser);
 
         NamedCommands.registerCommand("AutoShoot", getAutoShoot());
         NamedCommands.registerCommand("AutoRaiseIntake", getAutoRaiseIntake());

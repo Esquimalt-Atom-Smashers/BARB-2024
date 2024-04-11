@@ -4,6 +4,8 @@
 
 package frc.robot;
 
+import com.pathplanner.lib.auto.AutoBuilder;
+
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.wpilibj.TimedRobot;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -44,13 +46,13 @@ public class RobotContainer {
     private final BlinkinSubsystem blinkinSubsystem = new BlinkinSubsystem();
     
     public boolean intakeControls;
-    
+
     /**Makes robot container
      * @param robot - because...
      */
     public RobotContainer(TimedRobot robot) {
-        autonomousController = new AutonomousController(this);
-        autonomousController.sendOption();
+        // autonomousController = new AutonomousController(this);
+        // autonomousController.sendOption();
         
         driverLogitechController = new LogitechController(0);
         driverLogitechController.getRightXAxis().setInverted(true);
@@ -248,6 +250,7 @@ public class RobotContainer {
      * @return Command - the selected autonomous command
      */
     public Command getAutoCommand() {
+        autonomousController = new AutonomousController(this);
         return autonomousController.getAutonomousCommand();
     }
 }
