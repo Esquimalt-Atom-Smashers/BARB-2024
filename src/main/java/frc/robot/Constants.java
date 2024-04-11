@@ -16,6 +16,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.util.Units;
 import frc.lib.swerve.SecondOrderSwerveKinematics;
 import frc.lib.swerve.SwerveModuleConstants;
+import frc.robot.subsystems.CANdleSubsystem.Colour;
 
 /**
  * The Constants class provides a convenient place for teams to hold robot-wide numerical or boolean
@@ -246,7 +247,7 @@ public final class Constants {
         public static final int LOWER_LIMIT_SWITCH_PORT = 0;
         public static final int UPPER_LIMIT_SWITCH_PORT = 1;
 
-        public static final int ENCODER_PORT = 1;
+        public static final int ABSOLUTE_ENCODER_PORT = 2;
 
         /** Hardware behaviour constants */
         public static final IdleMode INTAKE_IDLE_MODE = IdleMode.kBrake;
@@ -318,5 +319,12 @@ public final class Constants {
         public static final int RIGHT_REVERSE_CHANNEL = 0;
 
         public static final int WINCH_PORT = 5;
+    }
+
+    public static class CANdleConstants {
+        public static final int CANDLE_PORT = -1;
+
+        // Random pink colour
+        public static final Colour PINK_COLOUR = new Colour(214, 21, 176);
     }
 }
