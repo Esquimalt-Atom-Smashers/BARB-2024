@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.SequentialCommandGroup;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.lib.controller.LogitechController;
+import frc.robot.Constants.CANdleConstants;
 import frc.robot.Constants.BlinkinConstants.BlinkinPattern;
 import frc.robot.subsystems.*;
 
@@ -43,7 +44,8 @@ public class RobotContainer {
     public final ShooterSubsystem shooterSubsystem = new ShooterSubsystem();
     public final IntakeSubsystem intakeSubsystem = new IntakeSubsystem();
     // private final TrapDoorSubsystem trapDoorSubsystem = new TrapDoorSubsystem();
-    private final BlinkinSubsystem blinkinSubsystem = new BlinkinSubsystem();
+    // private final BlinkinSubsystem blinkinSubsystem = new BlinkinSubsystem();
+    private final CANdleSubsystem candleSubsystem = new CANdleSubsystem();
     
     public boolean intakeControls;
 
@@ -106,7 +108,8 @@ public class RobotContainer {
             System.out.println("!!! Intake subsystem didn't start in the correct position !!!");
         }
 
-        bindBlinkinCommands();
+        //bindBlinkinCommands();
+        bindCandleCommands();
         
         // Intake Rotation (Manual)
         // driverLogitechController.getLeftBumper().whileTrue(intakeSubsystem.lowerIntakeCommand()).onFalse(intakeSubsystem.stopRotatingIntake());
@@ -154,8 +157,12 @@ public class RobotContainer {
     }
 
     /**Makes the robot flash pink whenever a note is picked up and glow solid pink when there is no note. */
-    private void bindBlinkinCommands() {
-        new Trigger(() -> intakeSubsystem.hasNote()).onTrue(blinkinSubsystem.updatePattern(BlinkinPattern.PINK_STROBE)).onFalse(blinkinSubsystem.updatePattern(BlinkinPattern.SOLID_PINK));
+    // private void bindBlinkinCommands() {
+    //     new Trigger(() -> intakeSubsystem.hasNote()).onTrue(blinkinSubsystem.updatePattern(BlinkinPattern.PINK_STROBE)).onFalse(blinkinSubsystem.updatePattern(BlinkinPattern.SOLID_PINK));
+    // }
+
+    private void bindCandleCommands() {
+        new Trigger(() -> intakeSubsystem.hasNote()).onTrue(candleSubsystem.setStrobeCommand(CANdleConstants.DEFAULT_PINK)).onFalse(candleSubsystem.setColorCommand(CANdleConstants.DEFAULT_PINK));
     }
 
     /**Autonomous path that shoots, moves forward while intaking, moves back and shoots */

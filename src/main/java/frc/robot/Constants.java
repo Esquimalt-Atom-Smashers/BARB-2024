@@ -322,9 +322,9 @@ public final class Constants {
     }
 
     public static class CANdleConstants {
-        public static final int CANDLE_PORT = -1;
+        public static final int CANDLE_ID = -1;
 
         // Random pink colour
-        public static final Colour PINK_COLOUR = new Colour(214, 21, 176);
+        public static final Colour DEFAULT_PINK = new Colour(214, 21, 176);
     }
 }
